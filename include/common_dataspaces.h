@@ -43,6 +43,8 @@
 
 #include <stdint.h>
 #include "config.h"
+#include "zfp_conf.h"
+
 #ifdef DS_HAVE_DIMES_SHMEM
 #include "mpi.h"
 #endif
@@ -70,6 +72,13 @@ int common_dspaces_put(const char *var_name,
         uint64_t *lb,
         uint64_t *ub,
         const void *data);
+int common_dspaces_put_compression(const char *var_name,
+        unsigned int ver, int size,
+        int ndim,
+        uint64_t *lb,
+        uint64_t *ub,
+        const void *data,
+        zfp_conf *conf);
 int common_dspaces_put_location_aware(const char *var_name, 
         unsigned int ver, int size,
         int ndim,

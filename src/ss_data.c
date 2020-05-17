@@ -41,6 +41,8 @@
 #include "debug.h"
 #include "ss_data.h"
 #include "queue.h"
+#include "zfp.h"
+#include "zfp_conf.h"
 
 #ifdef TIMING_SSD
 #include "timer.h"
@@ -871,23 +873,126 @@ int ssd_copy(struct obj_data *to_obj, struct obj_data *from_obj)
 */
 int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
 {
-        struct obj_data *from;
+        struct obj_data *from, *from_temp;
         struct matrix_desc to_mat, from_mat;
         struct bbox bbcom;
 
         list_for_each_entry(from, od_list, struct obj_data, obj_entry) {
 
-                bbox_intersect(&to->obj_desc.bb, &from->obj_desc.bb, &bbcom);
+                if (from->obj_desc.iscompressed) {
 
-                matrix_init(&from_mat, from->obj_desc.st,
-                            &from->obj_desc.bb, &bbcom, 
-                            from->obj_desc.size);
+                    from_temp = obj_data_alloc_no_data(from->obj_desc, NULL);
+                    from_temp->obj_desc.iscompressed = 0;
+                    from_temp->obj_desc.bb = from->obj_ref->obj_desc.bb;
+                    from_temp->data = malloc(from->obj_ref->obj_desc.size*bbox_volume(from->obj_ref->obj_desc.bb));
 
-                matrix_init(&to_mat, to->obj_desc.st, 
+                    zfp_conf conf = from->obj_desc.zfpconf;
+                    zfp_type type;     /* array scalar type */
+                    zfp_field* field;  /* array meta data */
+                    zfp_stream* zfp;   /* compressed stream */
+                    void* buffer;      /* storage for compressed stream */
+                    size_t bufsize;    /* byte size of compressed buffer */
+                    bitstream* stream; /* bit stream to write to or read from */
+                    size_t zfpsize;    /* byte size of compressed stream */
+
+                    /* allocate meta data for the n-D array a */
+                    switch (conf.dims)
+                    {
+                    case 1:
+                        field = zfp_field_1d(from_temp->data, type, from->obj_ref->obj_desc.bb.ub[0]-from->obj_ref->obj_desc.bb.lb[0]);
+                        break;
+        
+                    case 2:
+                        field = zfp_field_2d(from_temp->data, type, from->obj_ref->obj_desc.bb.ub[0]-from->obj_ref->obj_desc.bb.lb[0], 
+                                            from->obj_ref->obj_desc.bb.ub[1]-from->obj_ref->obj_desc.bb.lb[1]);
+                        break;
+        
+                    case 3:
+                        field = zfp_field_3d(from_temp->data, type, from->obj_ref->obj_desc.bb.ub[0]-from->obj_ref->obj_desc.bb.lb[0], 
+                                            from->obj_ref->obj_desc.bb.ub[1]-from->obj_ref->obj_desc.bb.lb[1], 
+                                            from->obj_ref->obj_desc.bb.ub[2]-from->obj_ref->obj_desc.bb.ub[2]);
+                        break;
+
+                    case 4:
+                        field = zfp_field_4d(from_temp->data, type, from->obj_ref->obj_desc.bb.ub[0]-from->obj_ref->obj_desc.bb.lb[0], 
+                                            from->obj_ref->obj_desc.bb.ub[1]-from->obj_ref->obj_desc.bb.lb[1], 
+                                            from->obj_ref->obj_desc.bb.ub[2]-from->obj_ref->obj_desc.bb.lb[2], 
+                                            from->obj_ref->obj_desc.bb.ub[3]-from->obj_ref->obj_desc.bb.lb[3]);
+                        break;
+        
+                    default:
+                        fprintf(stderr, "zfp only support up to 4 dimension compression\n");
+                        exit(1);
+                        break;
+                    }
+
+                    /* allocate meta data for a compressed stream */
+                    zfp = zfp_stream_open(NULL);
+                    /* set compression mode and parameters via one of three functions */
+                    if (conf.rate !=0)
+                    {
+                        zfp_stream_set_rate(zfp, conf.rate, type, conf.dims, 0);
+                    }
+                    else if(conf.precision !=0)
+                    {
+                        zfp_stream_set_precision(zfp, conf.precision);
+                    }
+                    else if(conf.tolerance !=0)
+                    {
+                        zfp_stream_set_accuracy(zfp, (conf.max-conf.min)*conf->tolerance);
+                    }
+                    /* allocate buffer for compressed data */
+                    bufsize = zfp_stream_maximum_size(zfp, field);
+                    buffer = malloc(bufsize);
+
+                    /* associate bit stream with allocated buffer */
+                    stream = stream_open(buffer, bufsize);
+                    zfp_stream_set_bit_stream(zfp, stream);
+                    zfp_stream_rewind(zfp);
+
+                    if (!zfp_decompress(zfp, field)) {
+                        fprintf(stderr, "decompression failed\n");
+                        exit(1);
+                    }
+
+                    bbox_intersect(&to->obj_desc.bb, &from_temp->obj_desc.bb, &bbcom);
+
+                    matrix_init(&from_mat, from_temp->obj_desc.st,
+                            &from_temp->obj_desc.bb, &bbcom, 
+                            from_temp->obj_desc.size);
+
+                    matrix_init(&to_mat, to->obj_desc.st, 
                             &to->obj_desc.bb, &bbcom, 
                             to->obj_desc.size);
 
-                matrix_copy(&to_mat, to->data, &from_mat, from->data);
+                    matrix_copy(&to_mat, to->data, &from_mat, from_temp->data);
+
+                    /* clean up */
+                    zfp_field_free(field);
+                    zfp_stream_close(zfp);
+                    stream_close(stream);
+                    free(buffer);
+                    free(from_temp->data);
+
+                }
+
+                else
+                {
+                    bbox_intersect(&to->obj_desc.bb, &from->obj_desc.bb, &bbcom);
+
+                    matrix_init(&from_mat, from->obj_desc.st,
+                                &from->obj_desc.bb, &bbcom, 
+                                from->obj_desc.size);
+
+                    matrix_init(&to_mat, to->obj_desc.st, 
+                                &to->obj_desc.bb, &bbcom, 
+                                to->obj_desc.size);
+
+                    matrix_copy(&to_mat, to->data, &from_mat, from->data);
+                }
+                
+
+                
         }
 
         return 0;
@@ -1497,7 +1602,14 @@ void shmem_obj_data_free(struct obj_data *od)
 
 uint64_t obj_data_size(struct obj_descriptor *obj_desc)
 {
-    return obj_desc->size * bbox_volume(&obj_desc->bb);
+    if(obj_desc->iscompressed)
+    {
+        return obj_desc->compressed_bytes;
+    }
+    else
+    {
+        return obj_desc->size * bbox_volume(&obj_desc->bb);
+    } 
 }
 
 uint64_t obj_data_sizev(struct obj_descriptor *odsc)

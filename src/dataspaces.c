@@ -149,9 +149,16 @@ void dspaces_define_gdim (const char *var_name,
 int dspaces_put (const char *var_name,
         unsigned int ver, int size,
         int ndim, uint64_t *lb, uint64_t *ub,
-        void *data)
+        void *data, int iscompressed)
 {
-    return common_dspaces_put(var_name, ver, size, ndim, lb, ub, data);
+    if(iscompressed)
+    {
+        return common_dspaces_put_compression();
+    }
+    else
+    {
+        return common_dspaces_put(var_name, ver, size, ndim, lb, ub, data);
+    }
 }
 
 int dspaces_get (const char *var_name,

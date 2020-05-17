@@ -2095,7 +2095,14 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         od = obj_data_alloc(&oh->u.o.odsc);
         if (!od)
                 goto err_out;
-        ssd_copy(od, from_obj);
+
+        //TODO:add compression to ssd_copy
+        if (od->obj_desc.iscompressed) {
+                memcpy(od->data, from_obj->data, od->obj_desc.compressed_bytes);
+        } else {
+                ssd_copy(od, from_obj);
+        }
+        
         od->obj_ref = from_obj;
 
         msg = msg_buf_alloc(rpc_s, peer, 0);

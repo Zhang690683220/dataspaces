@@ -49,6 +49,8 @@
 #include "dc_gspace.h"
 #include "ss_data.h"
 #include "timer.h"
+#include "zfp.h"
+#include "zfp_conf.h"
 #include "dataspaces.h"
 
 
@@ -453,11 +455,14 @@ int common_dspaces_put(const char *var_name,
                 .version = ver, .owner = -1, 
                 .st = st,
                 .size = size,
-                .bb = {.num_dims = ndim,}
+                .bb = {.num_dims = ndim,},
+                .iscompressed = 0
         };
 
         memset(odsc.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
         memset(odsc.bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        memset(odsc.compressed_bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        memset(odsc.compressed_bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
 
         memcpy(odsc.bb.lb.c, lb, sizeof(uint64_t)*ndim);
         memcpy(odsc.bb.ub.c, ub, sizeof(uint64_t)*ndim);
@@ -569,6 +574,429 @@ int common_dspaces_put_location_aware(const char *var_name,
 }
 #endif /* DS_HAVE_DSPACES_LOCATION_AWARE_WRITE */
 #endif /* SHM_OBJECTS */
+
+#ifdef SHMEM_OBJECTS
+int common_dspaces_put(const char *var_name, 
+        unsigned int ver, int size,
+        int ndim,
+        uint64_t *lb,
+        uint64_t *ub,
+        const void *data)
+{
+        if (!is_dspaces_lib_init() || !is_ndim_within_bound(ndim)) {
+            return -EINVAL;
+        }
+        struct obj_descriptor odsc_big= {
+                    .version = ver, .owner = -1, 
+                    .st = st,
+                    .size = size,
+                    .bb = {.num_dims = ndim,}
+                };
+        memset(odsc_big.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        memset(odsc_big.bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+
+        memcpy(odsc_big.bb.lb.c, lb, sizeof(uint64_t)*ndim);
+        memcpy(odsc_big.bb.ub.c, ub, sizeof(uint64_t)*ndim);
+        int shmem_max_size = 268435456;
+        //int shmem_max_size = 4096;
+        if (obj_data_size(&odsc_big) <= shmem_max_size){
+            struct obj_data *od;
+            int err = -ENOMEM;
+            strncpy(odsc_big.name, var_name, sizeof(odsc_big.name)-1);
+            odsc_big.name[sizeof(odsc_big.name)-1] = '\0';
+            od = obj_data_alloc_with_data(&odsc_big, data);
+            if (!od) {
+                uloga("'%s()': failed, can not allocate data object.\n", 
+                    __func__);
+                    return -ENOMEM;
+            }
+            set_global_dimension(&dcg->gdim_list, var_name, &dcg->default_gdim,
+                         &od->gdim);
+            err = dcg_obj_put(od);
+            if (err < 0) {
+                obj_data_free(od);
+                uloga("'%s()': failed with %d, can not put data object.\n", 
+                    __func__, err);
+                return err;
+            }
+            sync_op_id = err;
+        }else{
+
+            int total_blocks = ceil(obj_data_size(&odsc_big)/shmem_max_size);
+            int split_dim = -1;
+            int i;
+            int block_size;
+            for (i = ndim-1; i >=0 ; i--)
+            {
+                block_size = ceil((double)(ub[i]-lb[i]+1)/total_blocks);
+                if(block_size >= 1){
+                    split_dim = i;
+                    uloga("Block Size is %d", block_size);
+                    break;
+                }
+            }
+            if(split_dim == -1){
+                uloga("This should not happen \n");
+                return -1;
+            }
+            for (i = 0; i < total_blocks; ++i)
+                {
+                    struct obj_descriptor odsc = {
+                        .version = ver, .owner = -1, 
+                        .st = st,
+                        .size = size,
+                        .bb = {.num_dims = ndim,}
+                    };
+                    memset(odsc.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+                    memset(odsc.bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+                    int j;
+                    for (j = ndim-1; j >= 0; j--)
+                    {  
+                        if(j == split_dim){
+                            odsc.bb.lb.c[j] = lb[j]+i*block_size;
+                            odsc.bb.ub.c[j] = odsc.bb.lb.c[j] + block_size -1;
+                            if(odsc.bb.ub.c[j]>ub[j])
+                                odsc.bb.ub.c[j] = ub[j];
+                        }else{
+                            odsc.bb.lb.c[j] = odsc_big.bb.lb.c[j];
+                            odsc.bb.ub.c[j] = odsc_big.bb.ub.c[j];
+                        }
+                    }  
+                    struct obj_data *od;
+                    int err = -ENOMEM;
+                    strncpy(odsc.name, var_name, sizeof(odsc.name)-1);
+                    odsc.name[sizeof(odsc.name)-1] = '\0';
+                    od = obj_data_alloc_with_data_split(&odsc, data, &odsc_big);
+                    if (!od) {
+                        uloga("'%s()': failed, can not allocate data object.\n", 
+                            __func__);
+                            return -ENOMEM;
+                    }
+                    set_global_dimension(&dcg->gdim_list, var_name, &dcg->default_gdim,
+                                 &od->gdim);
+                    err = dcg_obj_put(od);
+                    if (err < 0) {
+                        obj_data_free(od);
+                        uloga("'%s()': failed with %d, can not put data object.\n", 
+                            __func__, err);
+                        return err;
+                    }
+                    sync_op_id = err;
+                }
+
+
+        }
+        return 0;
+}
+#else
+int common_dspaces_put_compression(const char *var_name, 
+        unsigned int ver, int size,
+        int ndim,
+        uint64_t *lb,
+        uint64_t *ub,
+        const void *data,
+        zfp_conf *conf)
+{
+#if defined(DS_HAVE_DSPACES_LOCATION_AWARE_WRITE)
+        return common_dspaces_put_location_aware(var_name, ver, size, ndim,
+                    lb, ub, data);
+#else
+        if (!is_dspaces_lib_init() || !is_ndim_within_bound(ndim)) {
+            return -EINVAL;
+        }
+
+        struct obj_descriptor odsc = {
+                .version = ver, .owner = -1, 
+                .st = st,
+                .size = size,
+                .bb = {.num_dims = ndim,},
+                .iscompressed = 1
+        };
+
+        memset(odsc.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        memset(odsc.bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        memset(odsc.compressed_bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        memset(odsc.compressed_bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+
+        memcpy(odsc.bb.lb.c, lb, sizeof(uint64_t)*ndim);
+        memcpy(odsc.bb.ub.c, ub, sizeof(uint64_t)*ndim);
+
+        struct obj_data *od;
+        int err = -ENOMEM;
+
+        strncpy(odsc.name, var_name, sizeof(odsc.name)-1);
+        odsc.name[sizeof(odsc.name)-1] = '\0';
+
+        /* ZFP Compression */
+
+        /* Compression Init */
+        zfp_type type = conf->type;      /* array scalar type */
+        zfp_field *field;               /* array meta data */
+        zfp_stream zfp;                 /* compressed stream */
+        void *buffer;                   /* storage for compressed stream */
+        size_t bufsize;                 /* byte size of compressed buffer */
+        bitstream *stream;              /* bit stream to write to or read from */
+        size_t zfpsize;                 /* byte size of compressed stream */
+
+        /* allocate meta data for the n-D array a */
+        switch (conf->dims)
+        {
+        case 1:
+            field = zfp_field_1d(data, type, ub[0]-lb[0]);
+            break;
+        
+        case 2:
+            field = zfp_field_2d(data, type, ub[0]-lb[0], ub[1]-lb[1]);
+            break;
+        
+        case 3:
+            field = zfp_field_3d(data, type, ub[0]-lb[0], ub[1]-lb[1], ub[2]-ub[2]);
+            break;
+
+        case 4:
+            field = zfp_field_4d(data, type, ub[0]-lb[0], ub[1]-lb[1], ub[2]-lb[2], ub[3]-lb[3]);
+            break;
+        
+        default:
+            fprintf(stderr, "zfp only support up to 4 dimension compression\n");
+            exit(1);
+            break;
+        }
+
+        /* allocate meta data for a compressed stream */
+        zfp = zfp_stream_open(NULL);
+
+        
+        
+        /* set compression mode and parameters via one of three functions */
+        if (conf->rate !=0)
+        {
+            zfp_stream_set_rate(zfp, conf->rate, type, conf->dims, 0);
+        }
+        else if(conf->precision !=0)
+        {
+            zfp_stream_set_precision(zfp, conf->precision);
+        }
+        else if(conf->tolerance !=0)
+        {
+            /* find the max and min of the data */
+            double data_max, data_min;
+            switch (type)
+            {
+            case zfp_type_int32:
+                int32_t max = *((int32_t*) data);
+                int32_t min = *((int32_t*) data);
+                int i; // traverse all data elements
+                for(i=0;i<bbox_volume(odsc.bb);i++)
+                {
+                    if(max < *((int32_t*) (data+i*sizeof(int32_t))))
+                    {
+                        max = *((int32_t*) (data+i*sizeof(int32_t)));
+                    }
+
+                    if(min > *((int32_t*) (data+i*sizeof(int32_t))))
+                    {
+                        min = *((int32_t*) (data+i*sizeof(int32_t)));
+                    }
+                    data_max = (double) max;
+                    data_min = (double) min;
+                }
+                break;
+
+            case zfp_type_int64:
+                int64_t max = *((int64_t*) data);
+                int64_t min = *((int64_t*) data);
+                int i; // traverse all data elements
+                for(i=0;i<bbox_volume(odsc.bb);i++)
+                {
+                    if(max < *((int64_t*) (data+i*sizeof(int64_t))))
+                    {
+                        max = *((int64_t*) (data+i*sizeof(int64_t)));
+                    }
+
+                    if(min > *((int64_t*) (data+i*sizeof(int64_t))))
+                    {
+                        min = *((int64_t*) (data+i*sizeof(int64_t)));
+                    }
+                    data_max = (double) max;
+                    data_min = (double) min;
+                }
+                break;
+            
+            case zfp_type_float:
+                float max = *((float*) data);
+                float min = *((float*) data);
+                int i; // traverse all data elements
+                for(i=0;i<bbox_volume(odsc.bb);i++)
+                {
+                    if(max < *((float*) (data+i*sizeof(float))))
+                    {
+                        max = *((float*) (data+i*sizeof(float)));
+                    }
+
+                    if(min > *((float*) (data+i*sizeof(float))))
+                    {
+                        min = *((float*) (data+i*sizeof(float)));
+                    }
+                    data_max = (double) max;
+                    data_min = (double) min;
+                }
+                break;
+
+            case zfp_type_double:
+                double max = *((double*) data);
+                double min = *((double*) data);
+                int i; // traverse all data elements
+                for(i=0;i<bbox_volume(odsc.bb);i++)
+                {
+                    if(max < *((double*) (data+i*sizeof(double))))
+                    {
+                        max = *((double*) (data+i*sizeof(double)));
+                    }
+
+                    if(min > *((double*) (data+i*sizeof(double))))
+                    {
+                        min = *((double*) (data+i*sizeof(double)));
+                    }
+                    data_max = (double) max;
+                    data_min = (double) min;
+                }
+                break;
+        
+            default:
+                fprintf(stderr, "zfp_type error!\n");
+                exit(1);
+                break;
+            }
+            conf->max = data_max;
+            conf->min = data_min;
+            zfp_stream_set_accuracy(zfp, (data_max-data_min)*conf->tolerance);
+        }
+
+        /* allocate buffer for compressed data */
+        bufsize = zfp_stream_maximum_size(zfp, field);
+        buffer = malloc(bufsize);
+
+        /* associate bit stream with allocated buffer */
+        stream = stream_open(buffer, bufsize);
+        zfp_stream_set_bit_stream(zfp, stream);
+        zfp_stream_rewind(zfp);
+
+        /* compress array and output compressed stream */
+        zfpsize = zfp_compress(zfp, field);
+        if (!zfpsize) {
+            fprintf(stderr, "compression failed!\n");
+            exit(1);
+        }
+        else {
+            /* Set odsc.compressed bytes to zfp size */
+            
+            odsc.compressed_bytes=zfpsize;
+
+
+            od = obj_data_alloc_with_data(&odsc, buffer);
+            if (!od) {
+                uloga("'%s()': failed, can not allocate data object.\n", 
+                    __func__);
+                return -ENOMEM;
+            }
+
+            // set global dimension
+            set_global_dimension(&dcg->gdim_list, var_name, &dcg->default_gdim,
+                                &od->gdim); 
+            err = dcg_obj_put(od);
+            if (err < 0) {
+                obj_data_free(od);
+                uloga("'%s()': failed with %d, can not put data object.\n", 
+                    __func__, err);
+                return err;
+            }
+            sync_op_id = err;
+        }
+        return 0;
+#endif
+}
+
+#define MAX_NUM_PEER_PER_NODE 64
+#if defined(DS_HAVE_DSPACES_LOCATION_AWARE_WRITE)
+int common_dspaces_put_location_aware(const char *var_name, 
+        unsigned int ver, int size,
+        int ndim,
+        uint64_t *lb,
+        uint64_t *ub,
+        void *data)
+{
+        if (!is_dspaces_lib_init() || !is_ndim_within_bound(ndim)) {
+            return -EINVAL;
+        }
+
+        struct obj_descriptor odsc = {
+                .version = ver, .owner = -1, 
+                .st = st,
+                .size = size,
+                .bb = {.num_dims = ndim,}
+        };
+
+        memset(odsc.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        memset(odsc.bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+
+        memcpy(odsc.bb.lb.c, lb, sizeof(uint64_t)*ndim);
+        memcpy(odsc.bb.ub.c, ub, sizeof(uint64_t)*ndim);
+
+        struct obj_data *od;
+        int err = -ENOMEM;
+
+        strncpy(odsc.name, var_name, sizeof(odsc.name)-1);
+        odsc.name[sizeof(odsc.name)-1] = '\0';
+
+        od = obj_data_alloc_with_data(&odsc, data);
+        if (!od) {
+            uloga("'%s()': failed, can not allocate data object.\n", 
+                __func__);
+                return -ENOMEM;
+        }
+
+        // set global dimension
+        set_global_dimension(&dcg->gdim_list, var_name, &dcg->default_gdim,
+                             &od->gdim); 
+
+        // find dataspaces servers running on local compute node
+        struct node_id* peer_tab[MAX_NUM_PEER_PER_NODE];
+        int local_server_ids[MAX_NUM_PEER_PER_NODE];
+        int num_space_srv = 0, num_local_peer = 0, num_local_server = 0;
+        num_space_srv = dcg_get_num_space_peers(dcg);
+        rpc_server_find_local_peers(dcg->dc->rpc_s, peer_tab,
+            &num_local_peer, MAX_NUM_PEER_PER_NODE);
+        int i, j;
+        for (i = j = 0; i < num_local_peer; i++) {
+            if (peer_tab[i]->ptlmap.id < num_space_srv) {
+                local_server_ids[j++] = peer_tab[i]->ptlmap.id;
+                num_local_server++;        
+            }
+        }
+
+        if (num_local_server == 0) {
+            err = dcg_obj_put(od);
+        } else {
+            // select on local server to put the data
+            int server_id = local_server_ids[dcg->dc->rpc_s->ptlmap.id % num_local_server];
+            // Application can use dspaces_get() to fetch the data.
+            err = dcg_obj_put_to_server(od, server_id);
+        }
+        if (err < 0) {
+            obj_data_free(od);
+            uloga("'%s()': failed with %d, can not put data object.\n", 
+                __func__, err);
+            return err;
+        }
+        sync_op_id = err;
+
+        return 0;
+}
+#endif /* DS_HAVE_DSPACES_LOCATION_AWARE_WRITE */
+#endif /* SHM_OBJECTS */
+
+
 
 int common_dspaces_remove(const char *var_name, unsigned int ver)
 {
