@@ -46,6 +46,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include "zfp_conf.h"
 
 /**
  * @file dataspaces.h
@@ -207,8 +208,8 @@ void dspaces_unlock_on_write(const char *lock_name,void *comm);
  */
 int dspaces_put (const char *var_name,
         unsigned int ver, int size,
-        int ndim, uint64_t *lb, uint64_t *ub, 
-        const void *data); 
+        int ndim, uint64_t *lb, uint64_t *ub,
+        void *data, int iscompressed, zfp_conf *conf)
 
 /**
  * @brief Query the space to retrieve data specified by a geometric descriptor.

@@ -45,6 +45,7 @@
 #include "debug.h"
 #include "common_dataspaces.h"
 #include "config.h"
+#include "zfp_conf.h"
 
 #ifdef DS_HAVE_DIMES
 #include "dimes_interface.h"
@@ -149,11 +150,11 @@ void dspaces_define_gdim (const char *var_name,
 int dspaces_put (const char *var_name,
         unsigned int ver, int size,
         int ndim, uint64_t *lb, uint64_t *ub,
-        void *data, int iscompressed)
+        void *data, int iscompressed, zfp_conf *conf)
 {
     if(iscompressed)
     {
-        return common_dspaces_put_compression();
+        return common_dspaces_put_compression(var_name, ver, size, ndim, lb, ub, data, conf);
     }
     else
     {
