@@ -461,8 +461,7 @@ int common_dspaces_put(const char *var_name,
 
         memset(odsc.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
         memset(odsc.bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
-        memset(odsc.compressed_bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
-        memset(odsc.compressed_bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        
 
         memcpy(odsc.bb.lb.c, lb, sizeof(uint64_t)*ndim);
         memcpy(odsc.bb.ub.c, ub, sizeof(uint64_t)*ndim);
