@@ -939,7 +939,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     }
                     else if(conf.tolerance !=0)
                     {
-                        zfp_stream_set_accuracy(zfp, (conf.max-conf.min)*conf->tolerance);
+                        zfp_stream_set_accuracy(zfp, (conf.max-conf.min)*conf.tolerance);
                     }
                     /* allocate buffer for compressed data */
                     bufsize = zfp_stream_maximum_size(zfp, field);
