@@ -881,10 +881,10 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
 
                 if (from->obj_desc.iscompressed) {
 
-                    from_temp = obj_data_alloc_no_data(from->obj_desc, NULL);
+                    from_temp = obj_data_alloc_no_data(&from->obj_desc, NULL);
                     from_temp->obj_desc.iscompressed = 0;
                     from_temp->obj_desc.bb = from->obj_ref->obj_desc.bb;
-                    from_temp->data = malloc(from->obj_ref->obj_desc.size*bbox_volume(from->obj_ref->obj_desc.bb));
+                    from_temp->data = malloc(from->obj_ref->obj_desc.size*bbox_volume(&from->obj_ref->obj_desc.bb));
 
                     zfp_conf conf = from->obj_desc.zfpconf;
                     zfp_type type;     /* array scalar type */
