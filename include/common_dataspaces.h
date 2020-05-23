@@ -43,6 +43,7 @@
 
 #include <stdint.h>
 #include "config.h"
+#include "zfp.h"
 #include "zfp_conf.h"
 
 #ifdef DS_HAVE_DIMES_SHMEM

@@ -37,6 +37,7 @@
 
 #include "bbox.h"
 #include "list.h"
+#include "zfp.h"
 #include "zfp_conf.h"
 #include <sys/mman.h>
 #include <fcntl.h>
