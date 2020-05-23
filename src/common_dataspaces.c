@@ -782,6 +782,7 @@ int common_dspaces_put_compression(const char *var_name,
             switch (type)
             {
             case zfp_type_int32:
+            {
                 int32_t max = *((int32_t*) data);
                 int32_t min = *((int32_t*) data);
                 int i; // traverse all data elements
@@ -800,8 +801,9 @@ int common_dspaces_put_compression(const char *var_name,
                     data_min = (double) min;
                 }
                 break;
-
+            }
             case zfp_type_int64:
+            {
                 int64_t max = *((int64_t*) data);
                 int64_t min = *((int64_t*) data);
                 int i; // traverse all data elements
@@ -820,8 +822,9 @@ int common_dspaces_put_compression(const char *var_name,
                     data_min = (double) min;
                 }
                 break;
-            
+            }
             case zfp_type_float:
+            {
                 float max = *((float*) data);
                 float min = *((float*) data);
                 int i; // traverse all data elements
@@ -840,8 +843,9 @@ int common_dspaces_put_compression(const char *var_name,
                     data_min = (double) min;
                 }
                 break;
-
+            }
             case zfp_type_double:
+            {
                 double max = *((double*) data);
                 double min = *((double*) data);
                 int i; // traverse all data elements
@@ -860,7 +864,7 @@ int common_dspaces_put_compression(const char *var_name,
                     data_min = (double) min;
                 }
                 break;
-        
+            }
             default:
                 fprintf(stderr, "zfp_type error!\n");
                 exit(1);
