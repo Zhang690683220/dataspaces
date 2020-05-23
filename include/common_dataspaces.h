@@ -77,7 +77,7 @@ int common_dspaces_put_compression(const char *var_name,
         int ndim,
         uint64_t *lb,
         uint64_t *ub,
-        const void *data,
+        void *data,
         zfp_conf *conf);
 int common_dspaces_put_location_aware(const char *var_name, 
         unsigned int ver, int size,
