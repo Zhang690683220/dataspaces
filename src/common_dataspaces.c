@@ -693,7 +693,7 @@ int common_dspaces_put_compression(const char *var_name,
         int ndim,
         uint64_t *lb,
         uint64_t *ub,
-        const void *data,
+        void *data,
         zfp_conf *conf)
 {
 #if defined(DS_HAVE_DSPACES_LOCATION_AWARE_WRITE)
@@ -714,8 +714,7 @@ int common_dspaces_put_compression(const char *var_name,
 
         memset(odsc.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
         memset(odsc.bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
-        memset(odsc.compressed_bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
-        memset(odsc.compressed_bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        
 
         memcpy(odsc.bb.lb.c, lb, sizeof(uint64_t)*ndim);
         memcpy(odsc.bb.ub.c, ub, sizeof(uint64_t)*ndim);
@@ -731,7 +730,7 @@ int common_dspaces_put_compression(const char *var_name,
         /* Compression Init */
         zfp_type type = conf->type;      /* array scalar type */
         zfp_field *field;               /* array meta data */
-        zfp_stream zfp;                 /* compressed stream */
+        zfp_stream *zfp;                 /* compressed stream */
         void *buffer;                   /* storage for compressed stream */
         size_t bufsize;                 /* byte size of compressed buffer */
         bitstream *stream;              /* bit stream to write to or read from */
