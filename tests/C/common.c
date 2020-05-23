@@ -83,7 +83,7 @@ int common_put(const char *var_name,
 {
 	if ( type == USE_DSPACES ) {
 		return dspaces_put(var_name, ver, size,
-                        ndim,lb, ub,data);
+                        ndim,lb, ub,data, 0, NULL);
     } else if (type == USE_DIMES) {
 #ifdef DS_HAVE_DIMES
 		return dimes_put(var_name, ver, size, 
