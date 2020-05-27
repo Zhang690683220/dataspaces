@@ -1,5 +1,5 @@
 DATASPACES_DIR=/home/bz186/myrepo/dataspaces/build/bin
-DATASPACES_INC=-I/home/bz186/myrepo/dataspaces/build/include
+DATASPACES_INC=-I/home/bz186/myrepo/dataspaces/include
 DATASPACES_LIB=-L/home/bz186/myrepo/dataspaces/build/lib -ldspaces -ldscommon -ldart   -lm  -lrt   -libverbs  -lrdmacm  -L/home/bz186/zfp/lib/ -lzfp
 CC=mpicc
 
