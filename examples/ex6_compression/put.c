@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 
     dspaces_init(nprocs, 1, &gcomm, NULL);
 
-    for(int timestep=0; timestep<10, timestep++)
+    for(int timestep=0; timestep<10; timestep++)
     {
         dspaces_lock_on_write("my_test_lock", NULL);
 
