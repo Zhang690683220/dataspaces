@@ -36,6 +36,8 @@ int main(int argc, char** argv)
         ub[0] = N-1; 
         ub[1] = M-1;
 
+        printf("debug1\n");
+
 
         dspaces_get(var_name, timestep, sizeof(double), ndim, lb, ub, data);
 
