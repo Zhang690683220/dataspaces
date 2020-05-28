@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
     for(int timestep=0; timestep<10; timestep++)
     {
-        dspaces_lock_on_read("my_test_lock", NULL);
+        dspaces_lock_on_write("my_test_lock", NULL);
 
         char var_name[128];
         sprintf(var_name, "ex6_sample_data");
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
         dspaces_put(var_name, timestep, sizeof(double), ndim, lb, ub, data);
 
-        dspaces_unlock_on_read("my_test_lock", NULL);
+        dspaces_unlock_on_write("my_test_lock", NULL);
     }
 
     
