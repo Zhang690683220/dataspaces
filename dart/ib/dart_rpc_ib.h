@@ -34,7 +34,7 @@
 #define RPC_NUM 10
 #define SYS_NUM 10
 
-#define RPC_CMD_PAD_BASE_SIZE 296 
+#define RPC_CMD_PAD_BASE_SIZE 312 
 #define RPC_CMD_PAD_SIZE RPC_CMD_PAD_BASE_SIZE+(BBOX_MAX_NDIM-3)*24
 
 #define ALIGN_ADDR_QUAD_BYTES(a)                                \
