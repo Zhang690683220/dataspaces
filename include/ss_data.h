@@ -37,6 +37,8 @@
 
 #include "bbox.h"
 #include "list.h"
+#include "zfp.h"
+#include "zfp_conf.h"
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <sys/shm.h>
@@ -62,6 +64,12 @@ struct obj_descriptor {
 
         /* Size of one element of a data object. */
         size_t                  size;
+
+        int                     iscompressed; //added by Bo Zhang for compression
+
+        uint64_t                compressed_bytes; //storage for compressed data
+
+        zfp_conf                zfpconf;
 
         char pad[2];//added by Tong Jin for 4 byte aligned in GEMINI
 } __attribute__((__packed__));
