@@ -456,6 +456,8 @@ int common_dspaces_put(const char *var_name,
                 .bb = {.num_dims = ndim,}
         };
 
+        printf("osdc_size: %d\n", sizeof(odsc));
+
         memset(odsc.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
         memset(odsc.bb.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
 
