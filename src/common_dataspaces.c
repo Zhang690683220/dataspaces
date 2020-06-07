@@ -709,7 +709,8 @@ int common_dspaces_put_compression(const char *var_name,
                 .st = st,
                 .size = size,
                 .bb = {.num_dims = ndim,},
-                .iscompressed = 1
+                .iscompressed = 1,
+                .zfpconf = *conf
         };
 
         memset(odsc.bb.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
