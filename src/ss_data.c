@@ -892,6 +892,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     //memcpy(odsc->bb.ub.c, from->obj_ref->obj_desc.bb.ub.c, odsc->bb.num_dims*sizeof(uint64_t));
                     //from_temp = obj_data_alloc_no_data(odsc, NULL);
                     from_temp->data = malloc(from_temp->obj_desc.size*bbox_volume(&from_temp->obj_desc.bb));
+                    printf("single data size: %ull\n bbox_volume: %ull\n",from_temp->obj_desc.size, bbox_volume(&from_temp->obj_desc.bb) );
 
                     zfp_conf conf = from->obj_desc.zfpconf;
                     zfp_type type;     /* array scalar type */
