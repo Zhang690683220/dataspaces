@@ -885,7 +885,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
 
                     from_temp = obj_data_alloc_no_data(&from->obj_desc, NULL);
                     from_temp->obj_desc.iscompressed = 0;
-                    memcpy(from_temp->obj_desc.bb, from->obj_desc.zfpconf.parent_bbox, sizeof(struct bbox));
+                    memcpy(&from_temp->obj_desc.bb, &from->obj_desc.zfpconf.parent_bbox, sizeof(struct bbox));
                     //from_temp->obj_desc.bb.num_dims = from->obj_desc.zfpconf.dims;
                     
                     //memcpy(odsc->bb.lb.c, from->obj_ref->obj_desc.bb.lb.c, odsc->bb.num_dims*sizeof(uint64_t));
