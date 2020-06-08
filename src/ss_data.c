@@ -881,21 +881,17 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
 
                 if (from->obj_desc.iscompressed) {
 
-                    struct obj_descriptor *odsc = malloc(sizeof(struct obj_descriptor));
-                    memcpy(odsc, &from->obj_desc, sizeof(struct obj_descriptor));
-                    odsc->iscompressed = 0;
 
 
-                    //from_temp = obj_data_alloc_no_data(&from->obj_desc, NULL);
-                    //from_temp->obj_desc.iscompressed = 0;
-                    //from_temp->obj_desc.bb.num_dims = from->obj_ref->obj_desc.bb.num_dims;
-                    int ndim = odsc->bb.num_dims;
-                    uint64_t lb[ndim] , ub[ndim];
-                    memcpy(lb, from->obj_ref->obj_desc.bb.lb.c, ndim*sizeof(uint64_t));
-                    memcpy(odsc->bb.lb.c, from->obj_ref->obj_desc.bb.lb.c, odsc->bb.num_dims*sizeof(uint64_t));
-                    memcpy(odsc->bb.ub.c, from->obj_ref->obj_desc.bb.ub.c, odsc->bb.num_dims*sizeof(uint64_t));
-                    from_temp = obj_data_alloc_no_data(odsc, NULL);
-                    from_temp->data = malloc(from->obj_ref->obj_desc.size*bbox_volume(&from->obj_ref->obj_desc.bb));
+                    from_temp = obj_data_alloc_no_data(&from->obj_desc, NULL);
+                    from_temp->obj_desc.iscompressed = 0;
+                    memcpy(from_temp->obj_desc.bb, from->obj_desc.zfpconf.parent_bbox, sizeof(struct bbox));
+                    //from_temp->obj_desc.bb.num_dims = from->obj_desc.zfpconf.dims;
+                    
+                    //memcpy(odsc->bb.lb.c, from->obj_ref->obj_desc.bb.lb.c, odsc->bb.num_dims*sizeof(uint64_t));
+                    //memcpy(odsc->bb.ub.c, from->obj_ref->obj_desc.bb.ub.c, odsc->bb.num_dims*sizeof(uint64_t));
+                    //from_temp = obj_data_alloc_no_data(odsc, NULL);
+                    from_temp->data = malloc(from_temp->obj_desc.size*bbox_volume(&from_temp->obj_desc.bb));
 
                     zfp_conf conf = from->obj_desc.zfpconf;
                     zfp_type type;     /* array scalar type */
@@ -910,25 +906,25 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     switch (conf.dims)
                     {
                     case 1:
-                        field = zfp_field_1d(from_temp->data, type, from->obj_ref->obj_desc.bb.ub.c[0]-from->obj_ref->obj_desc.bb.lb.c[0]);
+                        field = zfp_field_1d(from_temp->data, type, from_temp->obj_desc.bb.ub.c[0]-from_temp->obj_desc.bb.lb.c[0]);
                         break;
         
                     case 2:
-                        field = zfp_field_2d(from_temp->data, type, from->obj_ref->obj_desc.bb.ub.c[0]-from->obj_ref->obj_desc.bb.lb.c[0], 
-                                            from->obj_ref->obj_desc.bb.ub.c[1]-from->obj_ref->obj_desc.bb.lb.c[1]);
+                        field = zfp_field_2d(from_temp->data, type, from_temp->obj_desc.bb.ub.c[0]-from_temp->obj_desc.bb.lb.c[0], 
+                                            from_temp->obj_desc.bb.ub.c[1]-from_temp->obj_desc.bb.lb.c[1]);
                         break;
         
                     case 3:
-                        field = zfp_field_3d(from_temp->data, type, from->obj_ref->obj_desc.bb.ub.c[0]-from->obj_ref->obj_desc.bb.lb.c[0], 
-                                            from->obj_ref->obj_desc.bb.ub.c[1]-from->obj_ref->obj_desc.bb.lb.c[1], 
-                                            from->obj_ref->obj_desc.bb.ub.c[2]-from->obj_ref->obj_desc.bb.ub.c[2]);
+                        field = zfp_field_3d(from_temp->data, type, from_temp->obj_desc.bb.ub.c[0]-from_temp->obj_desc.bb.lb.c[0], 
+                                            from_temp->obj_desc.bb.ub.c[1]-from_temp->obj_desc.bb.lb.c[1], 
+                                            from_temp->obj_desc.bb.ub.c[2]-from_temp->obj_desc.bb.ub.c[2]);
                         break;
 
                     case 4:
-                        field = zfp_field_4d(from_temp->data, type, from->obj_ref->obj_desc.bb.ub.c[0]-from->obj_ref->obj_desc.bb.lb.c[0], 
-                                            from->obj_ref->obj_desc.bb.ub.c[1]-from->obj_ref->obj_desc.bb.lb.c[1], 
-                                            from->obj_ref->obj_desc.bb.ub.c[2]-from->obj_ref->obj_desc.bb.lb.c[2], 
-                                            from->obj_ref->obj_desc.bb.ub.c[3]-from->obj_ref->obj_desc.bb.lb.c[3]);
+                        field = zfp_field_4d(from_temp->data, type, from_temp->obj_desc.bb.ub.c[0]-from_temp->obj_desc.bb.lb.c[0], 
+                                            from_temp->obj_desc.bb.ub.c[1]-from_temp->obj_desc.bb.lb.c[1], 
+                                            from_temp->obj_desc.bb.ub.c[2]-from_temp->obj_desc.bb.lb.c[2], 
+                                            from_temp->obj_desc.bb.ub.c[3]-from_temp->obj_desc.bb.lb.c[3]);
                         break;
         
                     default:
