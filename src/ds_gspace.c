@@ -1478,10 +1478,6 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         ulog("server %d updating DHT\n", DSG_ID);
 
         err = obj_put_update_dht(dsg, od);
-        if (err == 0) {
-        	ulog("server %d finished server side put.\n", DSG_ID);
-	        return 0;
-        }
 
         if(od->obj_desc.iscompressed)
         {
@@ -1561,6 +1557,13 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
                         printf("\n");       
                 }
         }
+
+        if (err == 0) {
+        	ulog("server %d finished server side put.\n", DSG_ID);
+	        return 0;
+        }
+
+        
 
 
  err_free_msg:
