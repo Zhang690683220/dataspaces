@@ -894,7 +894,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     from_temp->data = malloc(from_temp->obj_desc.size*bbox_volume(&from_temp->obj_desc.bb));
                     printf("single data size: %llu\n bbox_volume: %llu\n",from_temp->obj_desc.size, bbox_volume(&from_temp->obj_desc.bb) );
 
-                    zfp_conf conf = from->obj_desc.zfpconf;
+                    //zfp_conf conf = from->obj_desc.zfpconf;
                     zfp_type type;     /* array scalar type */
                     zfp_field* field;  /* array meta data */
                     zfp_stream* zfp;   /* compressed stream */
@@ -904,7 +904,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     size_t zfpsize;    /* byte size of compressed stream */
 
                     /* allocate meta data for the n-D array a */
-                    switch (conf.dims)
+                    switch (from->obj_desc.zfpconf.dims)
                     {
                     case 1:
                         field = zfp_field_1d(from_temp->data, type, from_temp->obj_desc.bb.ub.c[0]-from_temp->obj_desc.bb.lb.c[0]);
@@ -937,17 +937,17 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     /* allocate meta data for a compressed stream */
                     zfp = zfp_stream_open(NULL);
                     /* set compression mode and parameters via one of three functions */
-                    if (conf.rate !=0)
+                    if (from->obj_desc.zfpconf.rate !=0)
                     {
-                        zfp_stream_set_rate(zfp, conf.rate, type, conf.dims, 0);
+                        zfp_stream_set_rate(zfp, from->obj_desc.zfpconf.rate, type, from->obj_desc.zfpconf.dims, 0);
                     }
-                    else if(conf.precision !=0)
+                    else if(from->obj_desc.zfpconf.precision !=0)
                     {
-                        zfp_stream_set_precision(zfp, conf.precision);
+                        zfp_stream_set_precision(zfp, from->obj_desc.zfpconf.precision);
                     }
-                    else if(conf.tolerance !=0)
+                    else if(from->obj_desc.zfpconf.tolerance !=0)
                     {
-                        zfp_stream_set_accuracy(zfp, (conf.max-conf.min)*conf.tolerance);
+                        zfp_stream_set_accuracy(zfp, (from->obj_desc.zfpconf.max-from->obj_desc.zfpconf.min)*from->obj_desc.zfpconf.tolerance);
                     }
                     /* allocate buffer for compressed data */
                     bufsize = zfp_stream_maximum_size(zfp, field);
