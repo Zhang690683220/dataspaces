@@ -962,12 +962,13 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                         fprintf(stderr, "decompression failed\n");
                         exit(1);
                     }
+                    double * data = from_temp->data;
 
                     for(int i=0; i<8;i++)
                     {
                         for (int j = 0; j < 8; j++)
                         {
-                            printf("%lf ",(double) *(from_temp->data+i*8+j));
+                            printf("%lf ", *(data+i*8+j));
                         }
                         printf("\n");       
                     }
