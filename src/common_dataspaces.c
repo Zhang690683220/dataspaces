@@ -720,6 +720,15 @@ int common_dspaces_put_compression(const char *var_name,
         memcpy(odsc.bb.lb.c, lb, sizeof(uint64_t)*ndim);
         memcpy(odsc.bb.ub.c, ub, sizeof(uint64_t)*ndim);
 
+        odsc.zfpconf.parent_bbox.num_dims = ndim;
+        memset(odsc.zfpconf.parent_bbox.lb.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        memset(odsc.zfpconf.parent_bbox.ub.c, 0, sizeof(uint64_t)*BBOX_MAX_NDIM);
+        
+
+        memcpy(odsc.zfpconf.parent_bbox.lb.c, lb, sizeof(uint64_t)*ndim);
+        memcpy(odsc.zfpconf.parent_bbox.ub.c, ub, sizeof(uint64_t)*ndim);
+
+
         struct obj_data *od;
         int err = -ENOMEM;
 

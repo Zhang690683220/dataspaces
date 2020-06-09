@@ -2099,7 +2099,7 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
 
         //TODO:add compression to ssd_copy
         if (od->obj_desc.iscompressed) {
-                memcpy(&od->obj_desc.zfpconf.parent_bbox, &from_obj->obj_desc.bb, sizeof(struct bbox));
+                //memcpy(&od->obj_desc.zfpconf.parent_bbox, &from_obj->obj_desc.bb, sizeof(struct bbox));
                 memcpy(od->data, from_obj->data, od->obj_desc.compressed_bytes);
         } else {
                 ssd_copy(od, from_obj);
