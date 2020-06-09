@@ -1536,7 +1536,8 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
                 }
                  /* allocate buffer for compressed data */
                 bufsize = zfp_stream_maximum_size(zfp, field);
-                buffer = malloc(bufsize);
+                buffer = malloc(od->obj_desc.compressed_bytes);
+                memcpy(buffer, od->data, od->obj_desc.compressed_bytes);
 
                     /* associate bit stream with allocated buffer */
                 stream = stream_open(buffer, bufsize);
@@ -1556,6 +1557,7 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
                         }
                         printf("\n");       
                 }
+                free(buffer);
         }
 
         if (err == 0) {
