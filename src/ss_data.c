@@ -895,7 +895,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     printf("single data size: %llu\n bbox_volume: %llu\n",from_temp->obj_desc.size, bbox_volume(&from_temp->obj_desc.bb) );
 
                     //zfp_conf conf = from->obj_desc.zfpconf;
-                    zfp_type type;     /* array scalar type */
+                    zfp_type type = from->obj_desc.zfpconf.type;     /* array scalar type */
                     zfp_field* field;  /* array meta data */
                     zfp_stream* zfp;   /* compressed stream */
                     void* buffer;      /* storage for compressed stream */
