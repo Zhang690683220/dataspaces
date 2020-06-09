@@ -963,6 +963,15 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                         exit(1);
                     }
 
+                    for(int i=0; i<8;i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            printf("%lf ",*(data+i*N+j));
+                        }
+                        printf("\n");       
+                    }
+
                     bbox_intersect(&to->obj_desc.bb, &from_temp->obj_desc.bb, &bbcom);
 
                     matrix_init(&from_mat, from_temp->obj_desc.st,
