@@ -45,6 +45,7 @@
 #include "rexec.h"
 #endif
 #include "util.h"
+#include "zfp.h"
 
 #define DSG_ID                  dsg->ds->self->ptlmap.id
 
@@ -1481,6 +1482,87 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         	ulog("server %d finished server side put.\n", DSG_ID);
 	        return 0;
         }
+
+        if(od->obj_desc.iscompressed)
+        {
+                double *array = malloc(8*8*sizeof(double));
+                zfp_type type = od->obj_desc.zfpconf.type;     /* array scalar type */
+                zfp_field* field;  /* array meta data */
+                zfp_stream* zfp;   /* compressed stream */
+                void* buffer;      /* storage for compressed stream */
+                size_t bufsize;    /* byte size of compressed buffer */
+                bitstream* stream; /* bit stream to write to or read from */
+                size_t zfpsize;    /* byte size of compressed stream */
+                switch (od->obj_desc.zfpconf.dims)
+                {
+                case 1:
+                        field = zfp_field_1d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]);
+                        break;
+        
+                case 2:
+                        field = zfp_field_2d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]);
+                        break;
+        
+                case 3:
+                        field = zfp_field_3d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1], 
+                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.ub.c[2]);
+                        break;
+
+                case 4:
+                        field = zfp_field_4d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1], 
+                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.lb.c[2], 
+                                            od->obj_desc.bb.ub.c[3]-od->obj_desc.bb.lb.c[3]);
+                        break;
+        
+                default:
+                        fprintf(stderr, "zfp only support up to 4 dimension compression\n");
+                        exit(1);
+                        break;
+                }
+
+                    /* allocate meta data for a compressed stream */
+                zfp = zfp_stream_open(NULL);
+                    /* set compression mode and parameters via one of three functions */
+                if (od->obj_desc.zfpconf.rate !=0)
+                {
+                        zfp_stream_set_rate(zfp, od->obj_desc.zfpconf.rate, type, od->obj_desc.zfpconf.dims, 0);
+                }
+                else if(od->obj_desc.zfpconf.precision !=0)
+                {
+                        zfp_stream_set_precision(zfp, od->obj_desc.zfpconf.precision);
+                }
+                else if(od->obj_desc.zfpconf.tolerance !=0)
+                {
+                        zfp_stream_set_accuracy(zfp, (od->obj_desc.zfpconf.max-od->obj_desc.zfpconf.min)*od->obj_desc.zfpconf.tolerance);
+                }
+                 /* allocate buffer for compressed data */
+                bufsize = zfp_stream_maximum_size(zfp, field);
+                buffer = malloc(bufsize);
+
+                    /* associate bit stream with allocated buffer */
+                stream = stream_open(buffer, bufsize);
+                zfp_stream_set_bit_stream(zfp, stream);
+                zfp_stream_rewind(zfp);
+
+                if (!zfp_decompress(zfp, field)) {
+                        fprintf(stderr, "decompression failed\n");
+                        exit(1);
+                }
+
+                for(int i=0; i<8;i++)
+                {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            printf("%lf ", *(array+i*8+j));
+                        }
+                        printf("\n");       
+                }
+        }
+
+
  err_free_msg:
         free(msg);
  err_free_data:
