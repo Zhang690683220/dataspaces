@@ -931,35 +931,35 @@ int common_dspaces_put_compression(const char *var_name,
             if(od->obj_desc.iscompressed)
             {
                 double *array = malloc(8*8*sizeof(double));
-                zfp_type rtype = od->obj_desc.zfpconf.type;     /* array scalar type */
+                zfp_type rtype = conf->type;     /* array scalar type */
                 zfp_field* rfield;  /* array meta data */
                 zfp_stream* rzfp;   /* compressed stream */
                 void* rbuffer;      /* storage for compressed stream */
                 size_t rbufsize;    /* byte size of compressed buffer */
                 bitstream* rstream; /* bit stream to write to or read from */
                 size_t rzfpsize;    /* byte size of compressed stream */
-                switch (od->obj_desc.zfpconf.dims)
+                switch (conf->dims)
                 {
                 case 1:
-                        rfield = zfp_field_1d(array, rtype, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]);
+                        rfield = zfp_field_1d(array, rtype, ub[0]-lb[0]);
                         break;
         
                 case 2:
-                        rfield = zfp_field_2d(array, rtype, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
-                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]);
+                        rfield = zfp_field_2d(array, rtype, ub[0]-lb[0], 
+                                            ub[1]-lb[1]);
                         break;
         
                 case 3:
-                        rfield = zfp_field_3d(array, rtype, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
-                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1], 
-                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.ub.c[2]);
+                        rfield = zfp_field_3d(array, rtype, ub[0]-lb[0], 
+                                            ub[1]-lb[1], 
+                                            ub[2]-lb[2]);
                         break;
 
                 case 4:
-                        rfield = zfp_field_4d(array, rtype, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
-                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1], 
-                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.lb.c[2], 
-                                            od->obj_desc.bb.ub.c[3]-od->obj_desc.bb.lb.c[3]);
+                        rfield = zfp_field_4d(array, rtype, ub[0]-lb[0], 
+                                            ub[1]-lb[1], 
+                                            ub[2]-lb[2], 
+                                            ub[3]-lb[3]);
                         break;
         
                 default:
@@ -971,25 +971,25 @@ int common_dspaces_put_compression(const char *var_name,
                     /* allocate meta data for a compressed stream */
                 rzfp = zfp_stream_open(NULL);
                     /* set compression mode and parameters via one of three functions */
-                if (od->obj_desc.zfpconf.rate !=0)
+                if (conf->rate !=0)
                 {
-                        zfp_stream_set_rate(rzfp, od->obj_desc.zfpconf.rate, type, od->obj_desc.zfpconf.dims, 0);
+                        zfp_stream_set_rate(rzfp, conf->rate, type, conf->dims, 0);
                 }
-                else if(od->obj_desc.zfpconf.precision !=0)
+                else if(conf->precision !=0)
                 {
-                        zfp_stream_set_precision(rzfp, od->obj_desc.zfpconf.precision);
+                        zfp_stream_set_precision(rzfp, conf->precision);
                 }
-                else if(od->obj_desc.zfpconf.tolerance !=0)
+                else if(conf->tolerance !=0)
                 {
-                        zfp_stream_set_accuracy(rzfp, (od->obj_desc.zfpconf.max-od->obj_desc.zfpconf.min)*od->obj_desc.zfpconf.tolerance);
+                        zfp_stream_set_accuracy(rzfp, (conf->max-conf->min)*conf->tolerance);
                 }
                  /* allocate buffer for compressed data */
                 rbufsize = zfp_stream_maximum_size(rzfp, rfield);
-                rbuffer = malloc(rbufsize);
-                memcpy(rbuffer, od->data, od->obj_desc.compressed_bytes);
+                //rbuffer = malloc(rbufsize);
+                //memcpy(rbuffer, od->data, od->obj_desc.compressed_bytes);
 
                     /* associate bit stream with allocated buffer */
-                rstream = stream_open(rbuffer, rbufsize);
+                rstream = stream_open(buffer, rbufsize);
                 zfp_stream_set_bit_stream(rzfp, rstream);
                 zfp_stream_rewind(rzfp);
 
