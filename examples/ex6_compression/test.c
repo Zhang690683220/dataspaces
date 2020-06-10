@@ -36,7 +36,7 @@ int main(int argc, char** argv)
             .dims = ndim
     };
 
-    zfp_type type = conf->type;      /* array scalar type */
+    zfp_type type = conf.type;      /* array scalar type */
     zfp_field *field;               /* array meta data */
     zfp_stream *zfp;                 /* compressed stream */
     void *buffer;                   /* storage for compressed stream */
@@ -180,8 +180,8 @@ int main(int argc, char** argv)
                 exit(1);
                 break;
             }
-            conf->max = data_max;
-            conf->min = data_min;
+            conf.max = data_max;
+            conf.min = data_min;
             zfp_stream_set_accuracy(zfp, (data_max-data_min)*conf.tolerance);
         }
 
