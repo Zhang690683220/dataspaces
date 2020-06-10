@@ -8,6 +8,7 @@ int main(int argc, char** argv)
 {
     int N = 8;
     int M = 8;
+    int ndim = 2;
 
 
     double *data = (double*) malloc(N*M*sizeof(double));
@@ -46,7 +47,7 @@ int main(int argc, char** argv)
 
 
     /* allocate meta data for the n-D array a */
-    switch (conf->dims)
+    switch (conf.dims)
     {
     case 1:
         field = zfp_field_1d(data, type, ub[0]-lb[0]);
@@ -76,15 +77,15 @@ int main(int argc, char** argv)
         
         
     /* set compression mode and parameters via one of three functions */
-    if (conf->rate !=0)
+    if (conf.rate !=0)
     {
-        zfp_stream_set_rate(zfp, conf->rate, type, conf->dims, 0);
+        zfp_stream_set_rate(zfp, conf.rate, type, conf.dims, 0);
     }
-    else if(conf->precision !=0)
+    else if(conf.precision !=0)
     {
-        zfp_stream_set_precision(zfp, conf->precision);
+        zfp_stream_set_precision(zfp, conf.precision);
     }
-    else if(conf->tolerance !=0)
+    else if(conf.tolerance !=0)
     {
         /* find the max and min of the data */
             double data_max, data_min;
@@ -181,7 +182,7 @@ int main(int argc, char** argv)
             }
             conf->max = data_max;
             conf->min = data_min;
-            zfp_stream_set_accuracy(zfp, (data_max-data_min)*conf->tolerance);
+            zfp_stream_set_accuracy(zfp, (data_max-data_min)*conf.tolerance);
         }
 
         /* allocate buffer for compressed data */
@@ -203,7 +204,7 @@ int main(int argc, char** argv)
             double *rdata = (double*) malloc(N*M*sizeof(double));
             zfp_field *rfield;
 
-            switch (conf->dims)
+            switch (conf.dims)
                 {
                 case 1:
                         rfield = zfp_field_1d(rdata, type, ub[0]-lb[0]);
@@ -244,7 +245,7 @@ int main(int argc, char** argv)
                 {
                         for (int j = 0; j < 8; j++)
                         {
-                            printf("%lf ", *(array+i*8+j));
+                            printf("%lf ", *(rdata+i*8+j));
                         }
                         printf("\n");       
                 }
