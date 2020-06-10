@@ -5,14 +5,14 @@ ZFP_INC=-I/home/bz186/myrepo/dataspaces/include -I/home/bz186/zfp/include -I/hom
 
 CC=mpicc
 
-DEPS=put.c get.c
-OBJ=put.o get.o
+DEPS=put.c get.c test.c
+OBJ=put.o get.o test.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
 
 
-all: put get
+all: put get test
 
 put: put.o
 	$(CC) -o $@ $^ $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
@@ -21,7 +21,10 @@ put: put.o
 get: get.o
 	$(CC) -o $@ $^ $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
 
+test: test.o
+	$(CC) -o $@ $^ $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
+
 .PHONY: clean
 
 clean:
-	rm -f *.o put get
+	rm -f *.o put get test
