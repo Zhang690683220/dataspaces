@@ -758,7 +758,7 @@ int common_dspaces_put_compression(const char *var_name,
             break;
         
         case 3:
-            field = zfp_field_3d(data, type, ub[0]-lb[0], ub[1]-lb[1], ub[2]-ub[2]);
+            field = zfp_field_3d(data, type, ub[0]-lb[0], ub[1]-lb[1], ub[2]-lb[2]);
             break;
 
         case 4:
@@ -973,7 +973,7 @@ int common_dspaces_put_compression(const char *var_name,
                     /* set compression mode and parameters via one of three functions */
                 if (conf->rate !=0)
                 {
-                        zfp_stream_set_rate(rzfp, conf->rate, type, conf->dims, 0);
+                        zfp_stream_set_rate(rzfp, conf->rate, rtype, conf->dims, 0);
                 }
                 else if(conf->precision !=0)
                 {
