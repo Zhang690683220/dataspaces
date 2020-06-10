@@ -17,7 +17,7 @@ int main(int argc, char** argv)
     {
         for (int j = 0; j < M; j++)
         {
-            *(data+i*N+j) = 1.0;
+            *(data+i*N+j) = 1.0*i*N+j;
             printf("%lf ",*(data+i*N+j));
         }
         printf("\n");       
@@ -186,7 +186,7 @@ int main(int argc, char** argv)
         }
 
         /* allocate buffer for compressed data */
-        bufsize = zfp_stream_maximum_size(zfp, field);
+        bufsize = zfp_stream_maximum_size(zfp, field)+40;
         buffer = malloc(bufsize);
 
         /* associate bit stream with allocated buffer */
