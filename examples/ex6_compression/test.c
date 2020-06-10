@@ -201,6 +201,7 @@ int main(int argc, char** argv)
             exit(1);
         }
         else {
+            /*
             double *rdata = (double*) malloc(N*M*sizeof(double));
             zfp_field *rfield;
 
@@ -233,6 +234,7 @@ int main(int argc, char** argv)
                         exit(1);
                         break;
                 }
+                */
 
             zfp_stream_rewind(zfp);
 
@@ -245,7 +247,7 @@ int main(int argc, char** argv)
                 {
                         for (int j = 0; j < 8; j++)
                         {
-                            printf("%lf ", *(rdata+i*8+j));
+                            printf("%lf ", *(data+i*8+j));
                         }
                         printf("\n");       
                 }
