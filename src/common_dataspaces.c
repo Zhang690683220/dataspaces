@@ -746,16 +746,7 @@ int common_dspaces_put_compression(const char *var_name,
         bitstream *stream;              /* bit stream to write to or read from */
         size_t zfpsize;                 /* byte size of compressed stream */
 
-        double *ddata = data;
 
-        for(int i=0; i<8;i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                printf("%lf ", *(ddata+i*8+j));
-            }
-            printf("\n");       
-        }
 
         /* allocate meta data for the n-D array a */
         switch (conf->dims)
