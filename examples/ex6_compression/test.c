@@ -238,7 +238,7 @@ int main(int argc, char** argv)
 
             zfp_stream_rewind(zfp);
 
-            if (!zfp_decompress(zfp, rfield)) {
+            if (!zfp_decompress(zfp, field)) {
                         fprintf(stderr, "decompression failed\n");
                         exit(1);
                 }
