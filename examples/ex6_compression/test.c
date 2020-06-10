@@ -17,7 +17,7 @@ int main(int argc, char** argv)
     {
         for (int j = 0; j < M; j++)
         {
-            *(data+i*N+j) = 1.0*i*N+j;
+            *(data+i*N+j) = 1.0;
             printf("%lf ",*(data+i*N+j));
         }
         printf("\n");       
