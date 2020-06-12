@@ -212,8 +212,7 @@ int main(int argc, char** argv)
                         break;
         
                 case 2:
-                        rfield = zfp_field_2d(rdata, type, ub[0]-lb[0], 
-                                            ub[1]-lb[1]);
+                        rfield = zfp_field_2d(rdata, type, ub[0]-lb[0], ub[1]-lb[1]);
                         break;
         
                 case 3:
@@ -247,7 +246,7 @@ int main(int argc, char** argv)
                 {
                         for (int j = 0; j < 8; j++)
                         {
-                            printf("%lf ", *(data+i*8+j));
+                            printf("%lf ", *(rdata+i*8+j));
                         }
                         printf("\n");       
                 }
