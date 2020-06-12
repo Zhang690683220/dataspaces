@@ -186,7 +186,7 @@ int main(int argc, char** argv)
         }
 
         /* allocate buffer for compressed data */
-        bufsize = zfp_stream_maximum_size(zfp, field)+40;
+        bufsize = zfp_stream_maximum_size(zfp, field);
         buffer = malloc(bufsize);
 
         /* associate bit stream with allocated buffer */
@@ -201,7 +201,7 @@ int main(int argc, char** argv)
             exit(1);
         }
         else {
-            /*
+            
             double *rdata = (double*) malloc(N*M*sizeof(double));
             zfp_field *rfield;
 
@@ -234,11 +234,11 @@ int main(int argc, char** argv)
                         exit(1);
                         break;
                 }
-                */
+                
 
             zfp_stream_rewind(zfp);
 
-            if (!zfp_decompress(zfp, field)) {
+            if (!zfp_decompress(zfp, rfield)) {
                         fprintf(stderr, "decompression failed\n");
                         exit(1);
                 }
