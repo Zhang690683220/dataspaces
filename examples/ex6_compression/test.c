@@ -238,7 +238,7 @@ int main(int argc, char** argv)
                 
             //stream = stream_open(buffer, bufsize);
             //zfp_stream_set_bit_stream(zfp, stream);
-            zfp_write_header(zfp, rfield, ZFP_HEADER_FULL);
+            int header_bits = zfp_write_header(zfp, rfield, ZFP_HEADER_FULL);
             zfp_stream_rewind(zfp);
 
             if (!zfp_decompress(zfp, rfield)) {
