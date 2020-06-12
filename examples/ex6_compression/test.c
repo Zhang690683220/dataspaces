@@ -192,7 +192,9 @@ int main(int argc, char** argv)
         /* associate bit stream with allocated buffer */
         stream = stream_open(buffer, bufsize);
         zfp_stream_set_bit_stream(zfp, stream);
+        zfp_write_header(zfp, field, ZFP_HEADER_FULL);
         zfp_stream_rewind(zfp);
+        
 
         /* compress array and output compressed stream */
         zfpsize = zfp_compress(zfp, field);
@@ -236,6 +238,7 @@ int main(int argc, char** argv)
                 
             //stream = stream_open(buffer, bufsize);
             //zfp_stream_set_bit_stream(zfp, stream);
+            zfp_write_header(zfp, rfield, ZFP_HEADER_FULL);
             zfp_stream_rewind(zfp);
 
             if (!zfp_decompress(zfp, rfield)) {
