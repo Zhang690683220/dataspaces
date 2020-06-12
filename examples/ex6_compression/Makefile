@@ -22,7 +22,7 @@ get: get.o
 	$(CC) -o $@ $^ $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
 
 test: test.o
-	$(CC) -o $@ $^ $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
+	$(CC) -g -o $@ $^ $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
 
 .PHONY: clean
 
