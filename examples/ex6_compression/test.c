@@ -54,7 +54,7 @@ int main(int argc, char** argv)
         break;
         
     case 2:
-        field = zfp_field_2d(data, type, ub[0]-lb[0], ub[1]-lb[1]);
+        field = zfp_field_2d(data, type, ub[0]-lb[0]+1, ub[1]-lb[1]+1);
         break;
         
     case 3:
@@ -215,7 +215,7 @@ int main(int argc, char** argv)
                         break;
         
                 case 2:
-                        rfield = zfp_field_2d(rdata, type, ub[0]-lb[0], ub[1]-lb[1]);
+                        rfield = zfp_field_2d(rdata, type, ub[0]-lb[0]+1, ub[1]-lb[1]+1);
                         break;
         
                 case 3:
