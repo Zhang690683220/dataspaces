@@ -207,6 +207,13 @@ int main(int argc, char** argv)
             
             double *rdata = (double*) malloc(N*M*sizeof(double));
             zfp_field *rfield;
+            zfp_stream *rzfp;
+            void *rbuffer;
+            size_t rbufsize;
+            bitstream *rstream;
+            size_t rzfpsize;
+            
+            
 
             switch (conf.dims)
                 {
@@ -236,13 +243,33 @@ int main(int argc, char** argv)
                         exit(1);
                         break;
                 }
+            
+            rzfp = zfp_stream_open(NULL);
                 
+            if (conf.rate !=0)
+                    {
+                        zfp_stream_set_rate(rzfp, conf.rate, type, conf.dims, 0);
+                    }
+                    else if(conf.precision !=0)
+                    {
+                        zfp_stream_set_precision(rzfp, conf.precision);
+                    }
+                    else if(conf.tolerance !=0)
+                    {
+                        zfp_stream_set_accuracy(rzfp, (conf.max-conf.min)*conf.tolerance);
+                    }
             //stream = stream_open(buffer, bufsize);
             //zfp_stream_set_bit_stream(zfp, stream);
             //int rheader_bits = zfp_read_header(zfp, rfield, ZFP_HEADER_FULL);
-            zfp_stream_rewind(zfp);
+            rbufsize = zfp_stream_maximum_size(rzfp, rfield);
+            rbuffer = malloc(rbufsize);
+            memcpy(rbuffer, buffer, zfpsize);
 
-            if (!zfp_decompress(zfp, rfield)) {
+            rstream = stream_open(rbuffer, rbufsize);
+            zfp_stream_set_bit_stream(rzfp, rstream);
+            zfp_stream_rewind(rzfp);
+
+            if (!zfp_decompress(rzfp, rfield)) {
                         fprintf(stderr, "decompression failed\n");
                         exit(1);
                 }
