@@ -23,7 +23,7 @@ int main(int argc, char** argv)
         printf("\n");       
     }
 
-    uint64_t lb[2] = {0}, ub[2] = {0};
+    uint32_t lb[2] = {0}, ub[2] = {0};
 
     ub[0] = N-1; 
     ub[1] = M-1;
