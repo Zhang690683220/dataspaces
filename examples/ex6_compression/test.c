@@ -23,7 +23,7 @@ int main(int argc, char** argv)
         printf("\n");       
     }
 
-    uint32_t lb[2] = {0}, ub[2] = {0};
+    uint64_t lb[2] = {0}, ub[2] = {0};
 
     ub[0] = N-1; 
     ub[1] = M-1;
@@ -234,8 +234,8 @@ int main(int argc, char** argv)
                         break;
                 }
                 
-            stream = stream_open(buffer, bufsize);
-            zfp_stream_set_bit_stream(zfp, stream);
+            //stream = stream_open(buffer, bufsize);
+            //zfp_stream_set_bit_stream(zfp, stream);
             zfp_stream_rewind(zfp);
 
             if (!zfp_decompress(zfp, rfield)) {
