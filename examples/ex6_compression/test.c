@@ -161,12 +161,12 @@ int main(int argc, char** argv)
                 int i; // traverse all data elements
                 for(i=0;i<N*M;i++)
                 {
-                    if(max < *((double*) (data+i))
+                    if(max < *((double*) (data+i)))
                     {
                         max = *((double*) (data+i);
                     }
 
-                    if(min > *((double*) (data+i)
+                    if(min > *((double*) (data+i))
                     {
                         min = *((double*) (data+i);
                     }
