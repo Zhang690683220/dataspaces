@@ -9,7 +9,7 @@ DEPS=put.c get.c test.c
 OBJ=put.o get.o test.o
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
+	$(CC) -g -c -o $@ $< $(ZFP_INC) $(DATASPACES_INC) $(DATASPACES_LIB)
 
 
 all: put get test
