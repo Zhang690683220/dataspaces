@@ -166,7 +166,7 @@ int main(int argc, char** argv)
                         max = *((double*) (data+i);
                     }
 
-                    if(min > *((double*) (data+i))
+                    if(min > *((double*) (data+i)))
                     {
                         min = *((double*) (data+i);
                     }
