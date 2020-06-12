@@ -234,7 +234,8 @@ int main(int argc, char** argv)
                         break;
                 }
                 
-
+            stream = stream_open(buffer, bufsize);
+            zfp_stream_set_bit_stream(zfp, stream);
             zfp_stream_rewind(zfp);
 
             if (!zfp_decompress(zfp, rfield)) {
