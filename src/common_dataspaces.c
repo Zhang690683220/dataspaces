@@ -800,14 +800,14 @@ int common_dspaces_put_compression(const char *var_name,
                 int i; // traverse all data elements
                 for(i=0;i<bbox_volume(&odsc.bb);i++)
                 {
-                    if(max < *((int32_t*) (data+i)))
+                    if(max < *((int32_t*) (data+i*sizeof(int32_t))))
                     {
-                        max = *((int32_t*) (data+i));
+                        max = *((int32_t*) (data+i*sizeof(int32_t)));
                     }
 
-                    if(min > *((int32_t*) (data+i)))
+                    if(min > *((int32_t*) (data+i*sizeof(int32_t))))
                     {
-                        min = *((int32_t*) (data+i));
+                        min = *((int32_t*) (data+i*sizeof(int32_t)));
                     }
                     data_max = (double) max;
                     data_min = (double) min;
@@ -821,14 +821,14 @@ int common_dspaces_put_compression(const char *var_name,
                 int i; // traverse all data elements
                 for(i=0;i<bbox_volume(&odsc.bb);i++)
                 {
-                    if(max < *((int64_t*) (data+i)))
+                    if(max < *((int64_t*) (data+i*sizeof(int64_t))))
                     {
-                        max = *((int64_t*) (data+i));
+                        max = *((int64_t*) (data+i*sizeof(int64_t)));
                     }
 
-                    if(min > *((int64_t*) (data+i)))
+                    if(min > *((int64_t*) (data+i*sizeof(int64_t))))
                     {
-                        min = *((int64_t*) (data+i));
+                        min = *((int64_t*) (data+i*sizeof(int64_t)));
                     }
                     data_max = (double) max;
                     data_min = (double) min;
@@ -842,14 +842,14 @@ int common_dspaces_put_compression(const char *var_name,
                 int i; // traverse all data elements
                 for(i=0;i<bbox_volume(&odsc.bb);i++)
                 {
-                    if(max < *((float*) (data+i)))
+                    if(max < *((float*) (data+i*sizeof(float))))
                     {
-                        max = *((float*) (data+i));
+                        max = *((float*) (data+i*sizeof(float)));
                     }
 
-                    if(min > *((float*) (data+i)))
+                    if(min > *((float*) (data+i*sizeof(float))))
                     {
-                        min = *((float*) (data+i));
+                        min = *((float*) (data+i*sizeof(float)));
                     }
                     data_max = (double) max;
                     data_min = (double) min;
@@ -863,14 +863,14 @@ int common_dspaces_put_compression(const char *var_name,
                 int i; // traverse all data elements
                 for(i=0;i<bbox_volume(&odsc.bb);i++)
                 {
-                    if(max < *((double*) (data+i)))
+                    if(max < *((double*) (data+i*sizeof(double))))
                     {
-                        max = *((double*) (data+i));
+                        max = *((double*) (data+i*sizeof(double)));
                     }
 
-                    if(min > *((double*) (data+i)))
+                    if(min > *((double*) (data+i*sizeof(double))))
                     {
-                        min = *((double*) (data+i));
+                        min = *((double*) (data+i*sizeof(double)));
                     }
                     data_max = (double) max;
                     data_min = (double) min;
