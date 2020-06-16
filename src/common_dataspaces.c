@@ -882,8 +882,8 @@ int common_dspaces_put_compression(const char *var_name,
                 exit(1);
                 break;
             }
-            conf->max = data_max;
-            conf->min = data_min;
+            odsc.zfpconf.max = data_max;
+            odsc.zfpconf.min = data_min;
             zfp_stream_set_accuracy(zfp, (data_max-data_min)*conf->tolerance);
         }
 
