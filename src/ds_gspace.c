@@ -1492,25 +1492,25 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
                 switch (od->obj_desc.zfpconf.dims)
                 {
                 case 1:
-                        field = zfp_field_1d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]);
+                        field = zfp_field_1d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1);
                         break;
         
                 case 2:
-                        field = zfp_field_2d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
-                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]);
+                        field = zfp_field_2d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1, 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1);
                         break;
         
                 case 3:
-                        field = zfp_field_3d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
-                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1], 
-                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.ub.c[2]);
+                        field = zfp_field_3d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1, 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1, 
+                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.ub.c[2]+1);
                         break;
 
                 case 4:
-                        field = zfp_field_4d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0], 
-                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1], 
-                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.lb.c[2], 
-                                            od->obj_desc.bb.ub.c[3]-od->obj_desc.bb.lb.c[3]);
+                        field = zfp_field_4d(array, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1, 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1, 
+                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.lb.c[2]+1, 
+                                            od->obj_desc.bb.ub.c[3]-od->obj_desc.bb.lb.c[3]+1);
                         break;
         
                 default:
