@@ -752,19 +752,19 @@ int common_dspaces_put_compression(const char *var_name,
         switch (conf->dims)
         {
         case 1:
-            field = zfp_field_1d(data, type, ub[0]-lb[0]);
+            field = zfp_field_1d(data, type, ub[0]-lb[0]+1);
             break;
         
         case 2:
-            field = zfp_field_2d(data, type, ub[0]-lb[0], ub[1]-lb[1]);
+            field = zfp_field_2d(data, type, ub[0]-lb[0]+1, ub[1]-lb[1]+1);
             break;
         
         case 3:
-            field = zfp_field_3d(data, type, ub[0]-lb[0], ub[1]-lb[1], ub[2]-lb[2]);
+            field = zfp_field_3d(data, type, ub[0]-lb[0]+1, ub[1]-lb[1]+1, ub[2]-lb[2]+1);
             break;
 
         case 4:
-            field = zfp_field_4d(data, type, ub[0]-lb[0], ub[1]-lb[1], ub[2]-lb[2], ub[3]-lb[3]);
+            field = zfp_field_4d(data, type, ub[0]-lb[0]+1, ub[1]-lb[1]+1, ub[2]-lb[2]+1, ub[3]-lb[3]+1);
             break;
         
         default:
@@ -800,14 +800,14 @@ int common_dspaces_put_compression(const char *var_name,
                 int i; // traverse all data elements
                 for(i=0;i<bbox_volume(&odsc.bb);i++)
                 {
-                    if(max < *((int32_t*) (data+i*sizeof(int32_t))))
+                    if(max < *((int32_t*) (data+i)))
                     {
-                        max = *((int32_t*) (data+i*sizeof(int32_t)));
+                        max = *((int32_t*) (data+i));
                     }
 
-                    if(min > *((int32_t*) (data+i*sizeof(int32_t))))
+                    if(min > *((int32_t*) (data+i)))
                     {
-                        min = *((int32_t*) (data+i*sizeof(int32_t)));
+                        min = *((int32_t*) (data+i));
                     }
                     data_max = (double) max;
                     data_min = (double) min;
@@ -821,14 +821,14 @@ int common_dspaces_put_compression(const char *var_name,
                 int i; // traverse all data elements
                 for(i=0;i<bbox_volume(&odsc.bb);i++)
                 {
-                    if(max < *((int64_t*) (data+i*sizeof(int64_t))))
+                    if(max < *((int64_t*) (data+i)))
                     {
-                        max = *((int64_t*) (data+i*sizeof(int64_t)));
+                        max = *((int64_t*) (data+i));
                     }
 
-                    if(min > *((int64_t*) (data+i*sizeof(int64_t))))
+                    if(min > *((int64_t*) (data+i)))
                     {
-                        min = *((int64_t*) (data+i*sizeof(int64_t)));
+                        min = *((int64_t*) (data+i));
                     }
                     data_max = (double) max;
                     data_min = (double) min;
@@ -842,14 +842,14 @@ int common_dspaces_put_compression(const char *var_name,
                 int i; // traverse all data elements
                 for(i=0;i<bbox_volume(&odsc.bb);i++)
                 {
-                    if(max < *((float*) (data+i*sizeof(float))))
+                    if(max < *((float*) (data+i)))
                     {
-                        max = *((float*) (data+i*sizeof(float)));
+                        max = *((float*) (data+i));
                     }
 
-                    if(min > *((float*) (data+i*sizeof(float))))
+                    if(min > *((float*) (data+i)))
                     {
-                        min = *((float*) (data+i*sizeof(float)));
+                        min = *((float*) (data+i));
                     }
                     data_max = (double) max;
                     data_min = (double) min;
@@ -863,14 +863,14 @@ int common_dspaces_put_compression(const char *var_name,
                 int i; // traverse all data elements
                 for(i=0;i<bbox_volume(&odsc.bb);i++)
                 {
-                    if(max < *((double*) (data+i*sizeof(double))))
+                    if(max < *((double*) (data+i)))
                     {
-                        max = *((double*) (data+i*sizeof(double)));
+                        max = *((double*) (data+i));
                     }
 
-                    if(min > *((double*) (data+i*sizeof(double))))
+                    if(min > *((double*) (data+i)))
                     {
-                        min = *((double*) (data+i*sizeof(double)));
+                        min = *((double*) (data+i));
                     }
                     data_max = (double) max;
                     data_min = (double) min;
@@ -943,25 +943,25 @@ int common_dspaces_put_compression(const char *var_name,
                 switch (conf->dims)
                 {
                 case 1:
-                        rfield = zfp_field_1d(array, rtype, ub[0]-lb[0]);
+                        rfield = zfp_field_1d(array, rtype, ub[0]-lb[0]+1);
                         break;
         
                 case 2:
-                        rfield = zfp_field_2d(array, rtype, ub[0]-lb[0], 
-                                            ub[1]-lb[1]);
+                        rfield = zfp_field_2d(array, rtype, ub[0]-lb[0]+1, 
+                                            ub[1]-lb[1]+1);
                         break;
         
                 case 3:
-                        rfield = zfp_field_3d(array, rtype, ub[0]-lb[0], 
-                                            ub[1]-lb[1], 
-                                            ub[2]-lb[2]);
+                        rfield = zfp_field_3d(array, rtype, ub[0]-lb[0]+1, 
+                                            ub[1]-lb[1]+1, 
+                                            ub[2]-lb[2]+1);
                         break;
 
                 case 4:
-                        rfield = zfp_field_4d(array, rtype, ub[0]-lb[0], 
-                                            ub[1]-lb[1], 
-                                            ub[2]-lb[2], 
-                                            ub[3]-lb[3]);
+                        rfield = zfp_field_4d(array, rtype, ub[0]-lb[0]+1, 
+                                            ub[1]-lb[1]+1, 
+                                            ub[2]-lb[2]+1, 
+                                            ub[3]-lb[3]+1);
                         break;
         
                 default:
