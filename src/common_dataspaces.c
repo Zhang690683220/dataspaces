@@ -993,9 +993,9 @@ int common_dspaces_put_compression(const char *var_name,
                     /* associate bit stream with allocated buffer */
                 rstream = stream_open(buffer, rbufsize);
                 zfp_stream_set_bit_stream(rzfp, rstream);
-                zfp_stream_rewind(zfp);
+                zfp_stream_rewind(rzfp);
 
-                if (!zfp_decompress(zfp, rfield)) {
+                if (!zfp_decompress(rzfp, rfield)) {
                         fprintf(stderr, "decompression failed\n");
                         exit(1);
                 }
