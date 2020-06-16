@@ -987,11 +987,11 @@ int common_dspaces_put_compression(const char *var_name,
                 }
                  /* allocate buffer for compressed data */
                 rbufsize = zfp_stream_maximum_size(rzfp, rfield);
-                //rbuffer = malloc(rbufsize);
-                //memcpy(rbuffer, od->data, od->obj_desc.compressed_bytes);
+                rbuffer = malloc(rbufsize);
+                memcpy(rbuffer, od->data, od->obj_desc.compressed_bytes);
 
                     /* associate bit stream with allocated buffer */
-                rstream = stream_open(buffer, rbufsize);
+                rstream = stream_open(rbuffer, rbufsize);
                 zfp_stream_set_bit_stream(rzfp, rstream);
                 zfp_stream_rewind(rzfp);
 
@@ -1009,6 +1009,7 @@ int common_dspaces_put_compression(const char *var_name,
                         printf("\n");       
                 }
                 free(buffer);
+                free(rbuffer);
             }
 
         }
