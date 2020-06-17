@@ -952,6 +952,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     /* allocate buffer for compressed data */
                     bufsize = zfp_stream_maximum_size(zfp, field);
                     buffer = malloc(bufsize);
+                    memcpy(buffer, from->data, from->obj_desc.compressed_bytes);
 
                     /* associate bit stream with allocated buffer */
                     stream = stream_open(buffer, bufsize);
