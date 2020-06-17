@@ -48,6 +48,6 @@ int main(int argc, char** argv)
         {
             printf("%lf ",*(data+i*N+j));
         }
-        printf("\n");       
+        printf("**************\n");       
     }
 }
