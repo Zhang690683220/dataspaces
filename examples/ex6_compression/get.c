@@ -33,8 +33,8 @@ int main(int argc, char** argv)
 
         uint64_t lb[2] = {0}, ub[2] = {0};
 
-        ub[0] = (N-1)/2; 
-        ub[1] = M-1;
+        ub[0] = 6; 
+        ub[1] = 6;
 
 
         dspaces_get(var_name, timestep, sizeof(double), ndim, lb, ub, data);
