@@ -13,8 +13,8 @@ int main(int argc, char** argv)
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Comm gcomm = MPI_COMM_WORLD;
 
-    int N = 8;
-    int M = 8;
+    int N = 4;
+    int M = 4;
 
 
     double *data = (double*) malloc(N*M*sizeof(double));
