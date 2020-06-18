@@ -43,6 +43,36 @@ int main(int argc, char** argv)
 
         uint64_t lb[2] = {0}, ub[2] = {0};
 
+        ub[0] = (N-1)/2; 
+        ub[1] = M-1;
+
+        zfp_conf conf = {
+            .type = zfp_type_double,
+            .rate = 0,
+            .precision = 0,
+            .tolerance = 1e-1,
+            .dims = ndim
+        };
+
+        dspaces_put(var_name, timestep, sizeof(double), ndim, lb, ub, data, 1, &conf);
+
+        dspaces_unlock_on_write("my_test_lock", NULL);
+    }
+
+    for(int timestep=0; timestep<10; timestep++)
+    {
+        dspaces_lock_on_write("my_test_lock", NULL);
+
+        char var_name[128];
+        sprintf(var_name, "ex6_sample_data");
+
+        int ndim = 2;
+
+        uint64_t lb[2] = {0}, ub[2] = {0};
+
+        lb[0] = (N-1)/2+1;
+        lb[1] = 0;
+
         ub[0] = N-1; 
         ub[1] = M-1;
 

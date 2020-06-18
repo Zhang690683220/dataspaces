@@ -13,8 +13,8 @@ int main(int argc, char** argv)
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Comm gcomm = MPI_COMM_WORLD;
 
-    int N = 4;
-    int M = 4;
+    int N = 8;
+    int M = 8;
 
 
     double *data = (double*) malloc(N*M*sizeof(double));
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
         uint64_t lb[2] = {0}, ub[2] = {0};
 
         ub[0] = N-1; 
-        ub[1] = M-1;
+        ub[1] = (M-1)/2;
 
 
         dspaces_get(var_name, timestep, sizeof(double), ndim, lb, ub, data);
