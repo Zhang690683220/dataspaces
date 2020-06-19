@@ -969,7 +969,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     {
                         for (int j = 0; j < from_temp->obj_desc.bb.ub.c[0]+1; j++)
                         {
-                            printf("%lf ", *(data+i*from_temp->obj_desc.bb.ub.c[0]+j));
+                            printf("%lf ", *(data+i*(from_temp->obj_desc.bb.ub.c[0]+1)+j));
                         }
                         printf("ss_data.c\n");       
                     }
