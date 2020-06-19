@@ -992,7 +992,7 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     {
                         for (int j = 0; j < 8; j++)
                         {
-                            printf("%lf ", *(data+i*8+j));
+                            printf("%lf ", *(todata+i*8+j));
                         }
                         printf("to_data.c\n");       
                     }
