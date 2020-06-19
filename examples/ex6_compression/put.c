@@ -59,6 +59,8 @@ int main(int argc, char** argv)
         dspaces_unlock_on_write("my_test_lock", NULL);
     }
 
+    double *data1 = data+32;
+
     for(int timestep=0; timestep<10; timestep++)
     {
         dspaces_lock_on_write("my_test_lock", NULL);
@@ -84,7 +86,7 @@ int main(int argc, char** argv)
             .dims = ndim
         };
 
-        dspaces_put(var_name, timestep, sizeof(double), ndim, lb, ub, data, 1, &conf);
+        dspaces_put(var_name, timestep, sizeof(double), ndim, lb, ub, data1, 1, &conf);
 
         dspaces_unlock_on_write("my_test_lock", NULL);
     }
