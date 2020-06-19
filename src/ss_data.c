@@ -965,13 +965,13 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
                     }
                     double * data = from_temp->data;
 
-                    for(int i=0; i<8;i++)
+                    for(int i=0; i<from_temp->obj_desc.bb.ub.c[1];i++)
                     {
-                        for (int j = 0; j < 8; j++)
+                        for (int j = 0; j < from_temp->obj_desc.bb.ub.c[0]; j++)
                         {
-                            printf("%lf ", *(data+i*8+j));
+                            printf("%lf ", *(data+i*from_temp->obj_desc.bb.ub.c[0]+j));
                         }
-                        printf("\n");       
+                        printf("ss_data.c\n");       
                     }
 
                     bbox_intersect(&to->obj_desc.bb, &from_temp->obj_desc.bb, &bbcom);
