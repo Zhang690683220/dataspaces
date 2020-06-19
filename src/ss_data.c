@@ -986,6 +986,18 @@ int ssd_copy_list(struct obj_data *to, struct list_head *od_list)
 
                     matrix_copy(&to_mat, to->data, &from_mat, from_temp->data);
 
+                    double *todata = to->data;
+
+                    for(int i=0; i<8;i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            printf("%lf ", *(data+i*8+j));
+                        }
+                        printf("to_data.c\n");       
+                    }
+
+
                     /* clean up */
                     zfp_field_free(field);
                     zfp_stream_close(zfp);
