@@ -43,8 +43,8 @@ int main(int argc, char** argv)
 
         uint64_t lb[2] = {0}, ub[2] = {0};
 
-        ub[0] = (N-1)/2; 
-        ub[1] = M-1;
+        ub[0] = 7; 
+        ub[1] = 3;
 
         zfp_conf conf = {
             .type = zfp_type_double,
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
         uint64_t lb[2] = {0}, ub[2] = {0};
 
         lb[0] = 0;
-        lb[1] = (N-1)/2+1;
+        lb[1] = 4;
 
         ub[0] = N-1; 
         ub[1] = M-1;
