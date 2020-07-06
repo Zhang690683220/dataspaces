@@ -46,6 +46,7 @@
 #endif
 #include "util.h"
 #include "zfp.h"
+#include "zfp_conf.h"
 
 #define DSG_ID                  dsg->ds->self->ptlmap.id
 
@@ -1418,6 +1419,240 @@ static int obj_put_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
     return 0;
 }
 
+static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
+{
+    struct obj_data *od = msg->private;
+    //void *data_temp = od->data;
+	void *compressed_data;
+
+    /* ZFP Compression */
+
+    /* Compression Init */
+    zfp_type type = od->obj_desc.zfpconf.type;      /* array scalar type */
+    zfp_field *field;               /* array meta data */
+    zfp_stream *zfp;                 /* compressed stream */
+    void *buffer;                   /* storage for compressed stream */
+    size_t bufsize;                 /* byte size of compressed buffer */
+    bitstream *stream;              /* bit stream to write to or read from */
+    size_t zfpsize;                 /* byte size of compressed stream */
+
+	/* allocate meta data for the n-D array a */
+    switch (od->obj_desc.zfpconf.dims)
+    {
+    case 1:
+        field = zfp_field_1d(od->data, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1);
+        break;
+        
+    case 2:
+        field = zfp_field_2d(od->data, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1,
+							od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1);
+        break;
+        
+    case 3:
+        field = zfp_field_3d(od->data, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1,
+							od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1,
+							od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.lb.c[2]+1);
+        break;
+
+    case 4:
+        field = zfp_field_4d(od->data, type, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1,
+							od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1, 
+							od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.lb.c[2]+1,
+							od->obj_desc.bb.ub.c[3]-od->obj_desc.bb.lb.c[3]+1);
+        break;
+        
+    default:
+        fprintf(stderr, "zfp only support up to 4 dimension compression\n");
+        exit(1);
+        break;
+    }
+
+    /* allocate meta data for a compressed stream */
+    zfp = zfp_stream_open(NULL);
+
+	/* set compression mode and parameters via one of three functions */
+    if (od->obj_desc.zfpconf.rate !=0)
+    {
+        zfp_stream_set_rate(zfp, od->obj_desc.zfpconf.rate, type, od->obj_desc.zfpconf.dims, 0);
+    }
+    else if(od->obj_desc.zfpconf.precision !=0)
+    {
+        zfp_stream_set_precision(zfp, od->obj_desc.zfpconf.precision);
+    }
+    else if(od->obj_desc.zfpconf.tolerance !=0)
+    {
+        /* find the max and min of the data */
+        double data_max, data_min;
+        switch (type)
+        {
+        case zfp_type_int32:
+        {
+            int32_t max = *((int32_t*) data);
+            int32_t min = *((int32_t*) data);
+            int i; // traverse all data elements
+            for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
+            {
+                if(max < *((int32_t*) (data+i*sizeof(int32_t))))
+                {
+                    max = *((int32_t*) (data+i*sizeof(int32_t)));
+                }
+
+                if(min > *((int32_t*) (data+i*sizeof(int32_t))))
+                {
+                    min = *((int32_t*) (data+i*sizeof(int32_t)));
+                }
+                data_max = (double) max;
+                data_min = (double) min;
+            }
+            break;
+        }
+        case zfp_type_int64:
+        {
+            int64_t max = *((int64_t*) data);
+            int64_t min = *((int64_t*) data);
+            int i; // traverse all data elements
+            for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
+            {
+                if(max < *((int64_t*) (data+i*sizeof(int64_t))))
+                {
+                    max = *((int64_t*) (data+i*sizeof(int64_t)));
+                }
+
+                if(min > *((int64_t*) (data+i*sizeof(int64_t))))
+                {
+                    min = *((int64_t*) (data+i*sizeof(int64_t)));
+                }
+                data_max = (double) max;
+                data_min = (double) min;
+            }
+            break;
+        }
+        case zfp_type_float:
+        {
+            float max = *((float*) data);
+            float min = *((float*) data);
+            int i; // traverse all data elements
+            for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
+            {
+                if(max < *((float*) (data+i*sizeof(float))))
+                {
+                    max = *((float*) (data+i*sizeof(float)));
+                }
+
+                if(min > *((float*) (data+i*sizeof(float))))
+                {
+                    min = *((float*) (data+i*sizeof(float)));
+                }
+                data_max = (double) max;
+                data_min = (double) min;
+            }
+            break;
+        }
+        case zfp_type_double:
+        {
+            double max = *((double*) data);
+            double min = *((double*) data);
+            int i; // traverse all data elements
+            for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
+            {
+                if(max < *((double*) (data+i*sizeof(double))))
+                {
+                    max = *((double*) (data+i*sizeof(double)));
+                }
+
+                if(min > *((double*) (data+i*sizeof(double))))
+                {
+                    min = *((double*) (data+i*sizeof(double)));
+                }
+                data_max = (double) max;
+                data_min = (double) min;
+            }
+            break;
+        }
+        default:
+            fprintf(stderr, "zfp_type error!\n");
+            exit(1);
+            break;
+        }
+        od->obj_desc.zfpconf.max = data_max;
+        od->obj_desc.zfpconf.min = data_min;
+        zfp_stream_set_accuracy(zfp, (data_max-data_min)*od->obj_desc.zfpconf.tolerance);
+    }
+
+	/* allocate buffer for compressed data */
+    bufsize = zfp_stream_maximum_size(zfp, field);
+    buffer = malloc(bufsize);
+
+	/* associate bit stream with allocated buffer */
+    stream = stream_open(buffer, bufsize);
+    zfp_stream_set_bit_stream(zfp, stream);
+    zfp_stream_rewind(zfp);
+
+	/* compress array and output compressed stream */
+    zfpsize = zfp_compress(zfp, field);
+    if (!zfpsize) {
+        fprintf(stderr, "compression failed!\n");
+        exit(1);
+    }
+    else {
+        /* Set odsc.compressed bytes to zfp size */
+            
+        od->obj_desc.compressed_bytes=zfpsize;
+
+		compressed_data = malloc(zfpsize);
+		memcpy(compressed_data, buffer, zfpsize);
+
+		/* clean up */
+  		zfp_field_free(field);
+  		zfp_stream_close(zfp);
+  		stream_close(stream);
+		free(buffer);
+	}
+
+	/* free original data pointer */
+	free(od->data);
+	od->data = compressed_data;
+
+    ls_add_obj(dsg->ls, od);
+
+#ifdef DS_SYNC_MSG
+    struct msg_buf *msg_ds;
+    struct node_id *peer_ds;
+    struct hdr_obj_put *hdr_ds;
+    int err = -ENOMEM;
+
+
+
+
+    peer_ds = (struct node_id*)msg->peer;
+    msg_ds = msg_buf_alloc(rpc_s, peer_ds, 1);
+
+    msg_ds->msg_rpc->cmd = ds_put_completion;
+    msg_ds->msg_rpc->id = DSG_ID;
+    msg_ds->cb = obj_put_sync_completion;
+
+    hdr_ds = (struct hdr_obj_put *)msg_ds->msg_rpc->pad;
+    hdr_ds->sync_op_id_ptr = msg->sync_op_id;
+
+    err = rpc_send(rpc_s, peer_ds, msg_ds);
+
+
+    if (err < 0){
+        free(msg_ds);
+        uloga("%s(): rpc_send fail from ds_put_completion\n",__func__);
+
+    }
+#endif
+    
+    free(msg);
+#ifdef DEBUG
+    uloga("'%s()': server %d finished receiving  %s, version %d.\n",
+        __func__, DSG_ID, od->obj_desc.name, od->obj_desc.version);
+#endif
+
+    return 0;
+}
+
 /*
 */
 static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
@@ -1454,7 +1689,16 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         msg->msg_data = od->data;
         msg->size = obj_data_size(&od->obj_desc);
         msg->private = od;
-        msg->cb = obj_put_completion;
+		if(odsc->iscompressed != 2)
+		{
+			msg->cb = obj_put_completion;
+		}
+		else
+		{
+			msg->cb = obj_put_compression_completion;
+		}
+		
+        
 #ifdef DS_SYNC_MSG
         msg->sync_op_id = hdr->sync_op_id_ptr; //synchronization lock pointer passed from client
         msg->peer = peer;
@@ -1557,6 +1801,9 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
                         }
                         printf("\n");       
                 }
+				zfp_field_free(field);
+  				zfp_stream_close(zfp);
+  				stream_close(stream);
                 free(buffer);
         }
 
@@ -2184,7 +2431,7 @@ static int dsgrpc_obj_get(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
         if (!od)
                 goto err_out;
 
-        //TODO:add compression to ssd_copy
+        
         if (od->obj_desc.iscompressed) {
                 //memcpy(&od->obj_desc.zfpconf.parent_bbox, &from_obj->obj_desc.bb, sizeof(struct bbox));
                 memcpy(od->data, from_obj->data, od->obj_desc.compressed_bytes);
