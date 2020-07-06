@@ -1487,19 +1487,19 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
         {
         case zfp_type_int32:
         {
-            int32_t max = *((int32_t*) data);
-            int32_t min = *((int32_t*) data);
+            int32_t max = *((int32_t*) od->data);
+            int32_t min = *((int32_t*) od->data);
             int i; // traverse all data elements
             for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
             {
-                if(max < *((int32_t*) (data+i*sizeof(int32_t))))
+                if(max < *((int32_t*) (od->data+i*sizeof(int32_t))))
                 {
-                    max = *((int32_t*) (data+i*sizeof(int32_t)));
+                    max = *((int32_t*) (od->data+i*sizeof(int32_t)));
                 }
 
-                if(min > *((int32_t*) (data+i*sizeof(int32_t))))
+                if(min > *((int32_t*) (od->data+i*sizeof(int32_t))))
                 {
-                    min = *((int32_t*) (data+i*sizeof(int32_t)));
+                    min = *((int32_t*) (od->data+i*sizeof(int32_t)));
                 }
                 data_max = (double) max;
                 data_min = (double) min;
@@ -1508,19 +1508,19 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
         }
         case zfp_type_int64:
         {
-            int64_t max = *((int64_t*) data);
-            int64_t min = *((int64_t*) data);
+            int64_t max = *((int64_t*) od->data);
+            int64_t min = *((int64_t*) od->data);
             int i; // traverse all data elements
             for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
             {
-                if(max < *((int64_t*) (data+i*sizeof(int64_t))))
+                if(max < *((int64_t*) (od->data+i*sizeof(int64_t))))
                 {
-                    max = *((int64_t*) (data+i*sizeof(int64_t)));
+                    max = *((int64_t*) (od->data+i*sizeof(int64_t)));
                 }
 
-                if(min > *((int64_t*) (data+i*sizeof(int64_t))))
+                if(min > *((int64_t*) (od->data+i*sizeof(int64_t))))
                 {
-                    min = *((int64_t*) (data+i*sizeof(int64_t)));
+                    min = *((int64_t*) (od->data+i*sizeof(int64_t)));
                 }
                 data_max = (double) max;
                 data_min = (double) min;
@@ -1529,19 +1529,19 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
         }
         case zfp_type_float:
         {
-            float max = *((float*) data);
-            float min = *((float*) data);
+            float max = *((float*) od->data);
+            float min = *((float*) od->data);
             int i; // traverse all data elements
             for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
             {
-                if(max < *((float*) (data+i*sizeof(float))))
+                if(max < *((float*) (od->data+i*sizeof(float))))
                 {
-                    max = *((float*) (data+i*sizeof(float)));
+                    max = *((float*) (od->data+i*sizeof(float)));
                 }
 
-                if(min > *((float*) (data+i*sizeof(float))))
+                if(min > *((float*) (od->data+i*sizeof(float))))
                 {
-                    min = *((float*) (data+i*sizeof(float)));
+                    min = *((float*) (od->data+i*sizeof(float)));
                 }
                 data_max = (double) max;
                 data_min = (double) min;
@@ -1550,19 +1550,19 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
         }
         case zfp_type_double:
         {
-            double max = *((double*) data);
-            double min = *((double*) data);
+            double max = *((double*) od->data);
+            double min = *((double*) od->data);
             int i; // traverse all data elements
             for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
             {
-                if(max < *((double*) (data+i*sizeof(double))))
+                if(max < *((double*) (od->data+i*sizeof(double))))
                 {
-                    max = *((double*) (data+i*sizeof(double)));
+                    max = *((double*) (od->data+i*sizeof(double)));
                 }
 
-                if(min > *((double*) (data+i*sizeof(double))))
+                if(min > *((double*) (od->data+i*sizeof(double))))
                 {
-                    min = *((double*) (data+i*sizeof(double)));
+                    min = *((double*) (od->data+i*sizeof(double)));
                 }
                 data_max = (double) max;
                 data_min = (double) min;
