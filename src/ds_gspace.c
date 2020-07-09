@@ -1427,6 +1427,8 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
 
     /* ZFP Compression */
 
+	printf("obj_put_compression_completion(): Compression at the server side\n");
+
     /* Compression Init */
     zfp_type type = od->obj_desc.zfpconf.type;      /* array scalar type */
     zfp_field *field;               /* array meta data */
