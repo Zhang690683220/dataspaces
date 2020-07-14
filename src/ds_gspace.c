@@ -1423,11 +1423,12 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
 {
     struct obj_data *od = msg->private;
     //void *data_temp = od->data;
+	double *buf = od->data
 	for(int i=0; i<8;i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            printf("%lf ",*(od->data+i*8+j));
+            printf("%lf ",*(buf+i*8+j));
         }
         printf("**************\n");       
     }
