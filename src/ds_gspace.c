@@ -1609,11 +1609,92 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
   		zfp_stream_close(zfp);
   		stream_close(stream);
 		free(buffer);
-	}
+    }
 
 	/* free original data pointer */
 	free(od->data);
 	od->data = compressed_data;
+
+	double *array = malloc(8*8*sizeof(double));
+    zfp_type rtype = od->obj_desc.zfpconf.type;     /* array scalar type */
+    zfp_field* rfield;  /* array meta data */
+    zfp_stream* rzfp;   /* compressed stream */
+    void* rbuffer;      /* storage for compressed stream */
+    size_t rbufsize;    /* byte size of compressed buffer */
+    bitstream* rstream; /* bit stream to write to or read from */
+    size_t rzfpsize;    /* byte size of compressed stream */
+
+	switch (od->obj_desc.zfpconf.dims)
+                {
+                case 1:
+                        rfield = zfp_field_1d(array, rtype, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1);
+                        break;
+        
+                case 2:
+                        rfield = zfp_field_2d(array, rtype, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1, 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1);
+                        break;
+        
+                case 3:
+                        rfield = zfp_field_3d(array, rtype, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1, 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1, 
+                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.lb.c[2]+1);
+                        break;
+
+                case 4:
+                        rfield = zfp_field_4d(array, rtype, od->obj_desc.bb.ub.c[0]-od->obj_desc.bb.lb.c[0]+1, 
+                                            od->obj_desc.bb.ub.c[1]-od->obj_desc.bb.lb.c[1]+1, 
+                                            od->obj_desc.bb.ub.c[2]-od->obj_desc.bb.lb.c[2]+1, 
+                                            od->obj_desc.bb.ub.c[3]-od->obj_desc.bb.lb.c[3]+1);
+                        break;
+        
+                default:
+                        fprintf(stderr, "zfp only support up to 4 dimension compression\n");
+                        exit(1);
+                        break;
+                }
+
+                    /* allocate meta data for a compressed stream */
+                rzfp = zfp_stream_open(NULL);
+                    /* set compression mode and parameters via one of three functions */
+                if (od->obj_desc.zfpconf.rate !=0)
+                {
+                        zfp_stream_set_rate(rzfp, od->obj_desc.zfpconf.rate, rtype, od->obj_desc.zfpconf.dims, 0);
+                }
+                else if(od->obj_desc.zfpconf.precision !=0)
+                {
+                        zfp_stream_set_precision(rzfp, od->obj_desc.zfpconf.precision);
+                }
+                else if(od->obj_desc.zfpconf.tolerance !=0)
+                {
+                        zfp_stream_set_accuracy(rzfp, (od->obj_desc.zfpconf.max-od->obj_desc.zfpconf.min)*od->obj_desc.zfpconf.tolerance);
+                }
+                 /* allocate buffer for compressed data */
+                rbufsize = zfp_stream_maximum_size(rzfp, rfield);
+                rbuffer = malloc(rbufsize);
+                memcpy(rbuffer, od->data, od->obj_desc.compressed_bytes);
+
+                    /* associate bit stream with allocated buffer */
+                rstream = stream_open(rbuffer, rbufsize);
+                zfp_stream_set_bit_stream(rzfp, rstream);
+                zfp_stream_rewind(rzfp);
+
+                if (!zfp_decompress(rzfp, rfield)) {
+                        fprintf(stderr, "decompression failed\n");
+                        exit(1);
+                }
+
+                for(int i=0; i<8;i++)
+                {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            printf("%lf ", *(array+i*8+j));
+                        }
+                        printf("\n");       
+                }
+                
+                free(rbuffer);
+            }
 
     ls_add_obj(dsg->ls, od);
 
@@ -1725,6 +1806,8 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
 
         err = obj_put_update_dht(dsg, od);
 
+        
+
         if(od->obj_desc.iscompressed)
         {
                 double *array = malloc(8*8*sizeof(double));
@@ -1807,6 +1890,8 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
   				zfp_stream_close(zfp);
   				stream_close(stream);
                 free(buffer);
+
+                
         }
 
         if (err == 0) {
