@@ -152,13 +152,20 @@ int dspaces_put (const char *var_name,
         int ndim, uint64_t *lb, uint64_t *ub,
         void *data, int iscompressed, zfp_conf *conf)
 {
-    if(iscompressed)
+    switch (iscompressed)
     {
-        return common_dspaces_put_compression(var_name, ver, size, ndim, lb, ub, data, conf);
-    }
-    else
-    {
+    case 0:
         return common_dspaces_put(var_name, ver, size, ndim, lb, ub, data);
+        break;
+    case 1:
+        return common_dspaces_put_compression(var_name, ver, size, ndim, lb, ub, data, conf);
+        break;
+    case 2:
+        return common_dspaces_put_compression_server(var_name, ver, size, ndim, lb, ub, data, conf);
+        break;
+    default:
+        return common_dspaces_put(var_name, ver, size, ndim, lb, ub, data);
+        break;
     }
 }
 
