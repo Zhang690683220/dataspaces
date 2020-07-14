@@ -1694,7 +1694,7 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
                 }
                 
                 free(rbuffer);
-            }
+            
 
     ls_add_obj(dsg->ls, od);
 
