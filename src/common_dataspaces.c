@@ -1265,6 +1265,16 @@ int common_dspaces_put_compression_server(const char *var_name,
                 return -ENOMEM;
         }
 
+		double *buf = od->data;
+        for(int i=0; i<8;i++)
+        {
+        for (int j = 0; j < 8; j++)
+        {
+            printf("%lf ",*(buf+i*8+j));
+        }
+        printf("common_dspace**************\n");       
+        }
+
         // set global dimension
         set_global_dimension(&dcg->gdim_list, var_name, &dcg->default_gdim,
                              &od->gdim); 
