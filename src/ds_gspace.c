@@ -1492,102 +1492,8 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
     }
     else if(od->obj_desc.zfpconf.tolerance !=0)
     {
-        /* find the max and min of the data */
-        double data_max, data_min;
-        switch (type)
-        {
-        case zfp_type_int32:
-        {
-            int32_t max = *((int32_t*) od->data);
-            int32_t min = *((int32_t*) od->data);
-            int i; // traverse all data elements
-            for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
-            {
-                if(max < *((int32_t*) (od->data+i*sizeof(int32_t))))
-                {
-                    max = *((int32_t*) (od->data+i*sizeof(int32_t)));
-                }
-
-                if(min > *((int32_t*) (od->data+i*sizeof(int32_t))))
-                {
-                    min = *((int32_t*) (od->data+i*sizeof(int32_t)));
-                }
-                data_max = (double) max;
-                data_min = (double) min;
-            }
-            break;
-        }
-        case zfp_type_int64:
-        {
-            int64_t max = *((int64_t*) od->data);
-            int64_t min = *((int64_t*) od->data);
-            int i; // traverse all data elements
-            for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
-            {
-                if(max < *((int64_t*) (od->data+i*sizeof(int64_t))))
-                {
-                    max = *((int64_t*) (od->data+i*sizeof(int64_t)));
-                }
-
-                if(min > *((int64_t*) (od->data+i*sizeof(int64_t))))
-                {
-                    min = *((int64_t*) (od->data+i*sizeof(int64_t)));
-                }
-                data_max = (double) max;
-                data_min = (double) min;
-            }
-            break;
-        }
-        case zfp_type_float:
-        {
-            float max = *((float*) od->data);
-            float min = *((float*) od->data);
-            int i; // traverse all data elements
-            for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
-            {
-                if(max < *((float*) (od->data+i*sizeof(float))))
-                {
-                    max = *((float*) (od->data+i*sizeof(float)));
-                }
-
-                if(min > *((float*) (od->data+i*sizeof(float))))
-                {
-                    min = *((float*) (od->data+i*sizeof(float)));
-                }
-                data_max = (double) max;
-                data_min = (double) min;
-            }
-            break;
-        }
-        case zfp_type_double:
-        {
-            double max = *((double*) od->data);
-            double min = *((double*) od->data);
-            int i; // traverse all data elements
-            for(i=0;i<bbox_volume(&od->obj_desc.bb);i++)
-            {
-                if(max < *((double*) (od->data+i*sizeof(double))))
-                {
-                    max = *((double*) (od->data+i*sizeof(double)));
-                }
-
-                if(min > *((double*) (od->data+i*sizeof(double))))
-                {
-                    min = *((double*) (od->data+i*sizeof(double)));
-                }
-                data_max = (double) max;
-                data_min = (double) min;
-            }
-            break;
-        }
-        default:
-            fprintf(stderr, "zfp_type error!\n");
-            exit(1);
-            break;
-        }
-        od->obj_desc.zfpconf.max = data_max;
-        od->obj_desc.zfpconf.min = data_min;
-        zfp_stream_set_accuracy(zfp, (data_max-data_min)*od->obj_desc.zfpconf.tolerance);
+        /* the max and min of the data have been found in dsgrpc_obj_put() */
+        zfp_stream_set_accuracy(zfp, (od->obj_desc.zfpconf.max-od->obj_desc.zfpconf.min)*od->obj_desc.zfpconf.tolerance);
     }
 
 	/* allocate buffer for compressed data */
@@ -1788,6 +1694,105 @@ static int dsgrpc_obj_put(struct rpc_server *rpc_s, struct rpc_cmd *cmd)
 		else
 		{
 			msg->cb = obj_put_compression_completion;
+			//make sure min & max in odsc being updated before updating DHT
+			if(odsc->zfpconf.tolerance !=0)
+			{
+				double data_max, data_min;
+				switch (odsc->zfpconf.type)
+            	{
+				case zfp_type_int32:
+				{
+					int32_t max = *((int32_t*) data);
+                	int32_t min = *((int32_t*) data);
+                	int i; // traverse all data elements
+                	for(i=0;i<bbox_volume(&odsc.bb);i++)
+                	{
+                    	if(max < *((int32_t*) (data+i*sizeof(int32_t))))
+                    	{
+                        	max = *((int32_t*) (data+i*sizeof(int32_t)));
+                    	}
+
+                    	if(min > *((int32_t*) (data+i*sizeof(int32_t))))
+                    	{
+                        	min = *((int32_t*) (data+i*sizeof(int32_t)));
+                    	}
+                    	data_max = (double) max;
+                    	data_min = (double) min;
+                	}
+                	break;
+            	}
+				case zfp_type_int64:
+            	{
+                	int64_t max = *((int64_t*) data);
+                	int64_t min = *((int64_t*) data);
+                	int i; // traverse all data elements
+                	for(i=0;i<bbox_volume(&odsc.bb);i++)
+                	{
+                    	if(max < *((int64_t*) (data+i*sizeof(int64_t))))
+                    	{
+                        	max = *((int64_t*) (data+i*sizeof(int64_t)));
+                    	}
+
+                    	if(min > *((int64_t*) (data+i*sizeof(int64_t))))
+                    	{
+                        	min = *((int64_t*) (data+i*sizeof(int64_t)));
+                    	}
+                    	data_max = (double) max;
+                    	data_min = (double) min;
+                	}
+                	break;
+            	}
+				case zfp_type_float:
+            	{
+                	float max = *((float*) data);
+                	float min = *((float*) data);
+                	int i; // traverse all data elements
+                	for(i=0;i<bbox_volume(&odsc.bb);i++)
+                	{
+                    	if(max < *((float*) (data+i*sizeof(float))))
+                    	{
+                        	max = *((float*) (data+i*sizeof(float)));
+                    	}
+
+                    	if(min > *((float*) (data+i*sizeof(float))))
+                    	{
+                        	min = *((float*) (data+i*sizeof(float)));
+                    	}
+                    	data_max = (double) max;
+                    	data_min = (double) min;
+                	}
+                	break;
+            	}
+				case zfp_type_double:
+            	{
+                	double max = *((double*) data);
+                	double min = *((double*) data);
+                	int i; // traverse all data elements
+                	for(i=0;i<bbox_volume(&odsc.bb);i++)
+                	{
+                    	if(max < *((double*) (data+i*sizeof(double))))
+                    	{
+                        	max = *((double*) (data+i*sizeof(double)));
+                    	}
+
+                    	if(min > *((double*) (data+i*sizeof(double))))
+                    	{
+                        	min = *((double*) (data+i*sizeof(double)));
+                    	}
+                    	data_max = (double) max;
+                    	data_min = (double) min;
+                	}
+                	break;
+            	}
+				default:
+                	fprintf(stderr, "zfp_type error!\n");
+                	exit(1);
+                	break;
+				}
+			od->obj_desc.zfpconf.max = data_max;
+			od->obj_desc.zfpconf.min = data_min;
+			}
+
 		}
 		
         
