@@ -1282,8 +1282,8 @@ int common_dspaces_put_compression_server(const char *var_name,
                     {
                         min = *((int32_t*) (data+i*sizeof(int32_t)));
                     }
-                    conf->max = (double) max;
-                    conf->min = (double) min;
+                    odsc.zfpconf.max = (double) max;
+                    odsc.zfpconf.min = (double) min;
                 }
                 break;
             }
@@ -1303,8 +1303,8 @@ int common_dspaces_put_compression_server(const char *var_name,
                     {
                         min = *((int64_t*) (data+i*sizeof(int64_t)));
                     }
-                    conf->max = (double) max;
-                    conf->min = (double) min;
+                    odsc.zfpconf.max = (double) max;
+                    odsc.zfpconf.min = (double) min;
                 }
                 break;
             }
@@ -1324,8 +1324,8 @@ int common_dspaces_put_compression_server(const char *var_name,
                     {
                         min = *((float*) (data+i*sizeof(float)));
                     }
-                    conf->max = (double) max;
-                    conf->min = (double) min;
+                    odsc.zfpconf.max = (double) max;
+                    odsc.zfpconf.min = (double) min;
                 }
                 break;
             }
@@ -1345,8 +1345,8 @@ int common_dspaces_put_compression_server(const char *var_name,
                     {
                         min = *((double*) (data+i*sizeof(double)));
                     }
-                    conf->max = (double) max;
-                    conf->min = (double) min;
+                    odsc.zfpconf.max = (double) max;
+                    odsc.zfpconf.min = (double) min;
                 }
                 break;
             }
