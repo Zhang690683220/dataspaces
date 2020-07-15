@@ -1252,6 +1252,16 @@ int common_dspaces_put_compression_server(const char *var_name,
         memcpy(odsc.zfpconf.parent_bbox.lb.c, lb, sizeof(uint64_t)*ndim);
         memcpy(odsc.zfpconf.parent_bbox.ub.c, ub, sizeof(uint64_t)*ndim);
 
+		double *buf1 = data;
+        for(int i=0; i<8;i++)
+        {
+        for (int j = 0; j < 8; j++)
+        {
+            printf("%lf ",*(buf1+i*8+j));
+        }
+        printf("common_dspace**************\n");       
+        }
+
         struct obj_data *od;
         int err = -ENOMEM;
 
