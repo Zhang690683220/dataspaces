@@ -1633,6 +1633,22 @@ void shmem_obj_data_free(struct obj_data *od)
 
 uint64_t obj_data_size(struct obj_descriptor *obj_desc)
 {
+    switch (obj_desc->iscompressed)
+    {
+    case 0:
+        return obj_desc->size * bbox_volume(&obj_desc->bb);
+        break;
+    case 1:
+        return obj_desc->compressed_bytes;
+        break;
+    case 2:
+        return obj_desc->size * bbox_volume(&obj_desc->bb);
+        break;   
+    default:
+        return obj_desc->size * bbox_volume(&obj_desc->bb);
+        break;
+    }
+    /*
     if(obj_desc->iscompressed)
     {
         return obj_desc->compressed_bytes;
@@ -1640,7 +1656,7 @@ uint64_t obj_data_size(struct obj_descriptor *obj_desc)
     else
     {
         return obj_desc->size * bbox_volume(&obj_desc->bb);
-    } 
+    } */
 }
 
 uint64_t obj_data_sizev(struct obj_descriptor *odsc)
