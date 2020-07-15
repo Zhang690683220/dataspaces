@@ -1262,6 +1262,101 @@ int common_dspaces_put_compression_server(const char *var_name,
         printf("common_dspace**************\n");       
         }
 
+        if (conf->tolerance != 0)
+        {
+            switch (conf->type)
+            {
+            case zfp_type_int32:
+            {
+                int32_t max = *((int32_t*) data);
+                int32_t min = *((int32_t*) data);
+                int i; // traverse all data elements
+                for(i=0;i<bbox_volume(&odsc.bb);i++)
+                {
+                    if(max < *((int32_t*) (data+i*sizeof(int32_t))))
+                    {
+                        max = *((int32_t*) (data+i*sizeof(int32_t)));
+                    }
+
+                    if(min > *((int32_t*) (data+i*sizeof(int32_t))))
+                    {
+                        min = *((int32_t*) (data+i*sizeof(int32_t)));
+                    }
+                    conf->max = (double) max;
+                    conf->min = (double) min;
+                }
+                break;
+            }
+            case zfp_type_int64:
+            {
+                int64_t max = *((int64_t*) data);
+                int64_t min = *((int64_t*) data);
+                int i; // traverse all data elements
+                for(i=0;i<bbox_volume(&odsc.bb);i++)
+                {
+                    if(max < *((int64_t*) (data+i*sizeof(int64_t))))
+                    {
+                        max = *((int64_t*) (data+i*sizeof(int64_t)));
+                    }
+
+                    if(min > *((int64_t*) (data+i*sizeof(int64_t))))
+                    {
+                        min = *((int64_t*) (data+i*sizeof(int64_t)));
+                    }
+                    data_max = (double) max;
+                    data_min = (double) min;
+                }
+                break;
+            }
+            case zfp_type_float:
+            {
+                float max = *((float*) data);
+                float min = *((float*) data);
+                int i; // traverse all data elements
+                for(i=0;i<bbox_volume(&odsc.bb);i++)
+                {
+                    if(max < *((float*) (data+i*sizeof(float))))
+                    {
+                        max = *((float*) (data+i*sizeof(float)));
+                    }
+
+                    if(min > *((float*) (data+i*sizeof(float))))
+                    {
+                        min = *((float*) (data+i*sizeof(float)));
+                    }
+                    data_max = (double) max;
+                    data_min = (double) min;
+                }
+                break;
+            }
+            case zfp_type_double:
+            {
+                double max = *((double*) data);
+                double min = *((double*) data);
+                int i; // traverse all data elements
+                for(i=0;i<bbox_volume(&odsc.bb);i++)
+                {
+                    if(max < *((double*) (data+i*sizeof(double))))
+                    {
+                        max = *((double*) (data+i*sizeof(double)));
+                    }
+
+                    if(min > *((double*) (data+i*sizeof(double))))
+                    {
+                        min = *((double*) (data+i*sizeof(double)));
+                    }
+                    data_max = (double) max;
+                    data_min = (double) min;
+                }
+                break;
+            }
+            default:
+                fprintf(stderr, "zfp_type error!\n");
+                exit(1);
+                break;
+            }
+        }
+
         struct obj_data *od;
         int err = -ENOMEM;
 
