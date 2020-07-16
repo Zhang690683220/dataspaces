@@ -1363,6 +1363,49 @@ static int obj_put_update_dht(struct ds_gspace *dsg, struct obj_data *od)
 	ERROR_TRACE();
 }
 
+/* 
+   Update the DHT metadata with the new obj_descriptor information.
+*/
+static int obj_put_update_dht_local(struct ds_gspace *dsg, struct obj_data *od)
+{
+    struct obj_descriptor *odsc = &od->obj_desc;
+    struct sspace* ssd = lookup_sspace(dsg, odsc->name, &od->gdim);
+	struct dht_entry *dht_tab[ssd->dht->num_entries];
+	/* TODO: create a separate header structure for object
+	   updates; for now just abuse the hdr_obj_get. */
+	int num_de, min_rank, err;
+
+	/* Compute object distribution to nodes in the space. */
+	ulog("server %d determining object hash.", DSG_ID);
+	num_de = ssd_hash(ssd, &odsc->bb, dht_tab);
+	if (num_de == 0) {
+		uloga("'%s()': this should not happen, num_de == 0 ?!\n",
+			__func__);
+	}
+
+	min_rank = dht_tab[0]->rank;
+	
+#ifdef DEBUG
+	char *str;
+            
+        str = alloc_sprintf("S%2d: got obj_desc '%s' ver %d for ", DSG_ID, odsc->name, odsc->version);
+        str = str_append(str, bbox_sprint(&odsc->bb));
+
+	uloga("'%s()': %s\n", __func__, str);
+	free(str);
+#endif
+	dht_add_entry(ssd->ent_self, odsc);
+	if (dsg->ds->self->ptlmap.id == min_rank) {
+		err = cq_check_match(odsc);
+		if (err < 0)
+			goto err_out;
+	}
+
+	return 0;
+ err_out:
+	ERROR_TRACE();
+}
+
 /*
     obj_put synchronization completion
     Remove msg_ds buffer after obj_put_completion() send back rpc call
@@ -1422,6 +1465,7 @@ static int obj_put_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
 static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_buf *msg)
 {
     struct obj_data *od = msg->private;
+    int err;
     //void *data_temp = od->data;
 	double *buf = od->data;
 	for(int i=0; i<8;i++)
@@ -1609,6 +1653,11 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
                 
                 free(rbuffer);
             
+    err = obj_put_update_dht_local(dsg, od);
+
+    if(err != 0)
+        uloga("'%s()': failed with %d.\n", __func__, err);
+        return err;
 
     ls_add_obj(dsg->ls, od);
 
