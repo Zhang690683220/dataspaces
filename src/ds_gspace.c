@@ -1395,12 +1395,12 @@ static int obj_put_update_dht_local(struct ds_gspace *dsg, struct obj_data *od)
 	free(str);
 #endif
 	dht_add_entry(ssd->ent_self, odsc);
-	if (dsg->ds->self->ptlmap.id == min_rank) {
+	/*if (dsg->ds->self->ptlmap.id == min_rank) {
 		err = cq_check_match(odsc);
 		if (err < 0)
 			goto err_out;
 	}
-
+    */
 	return 0;
  err_out:
 	ERROR_TRACE();
