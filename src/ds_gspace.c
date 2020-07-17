@@ -1655,10 +1655,10 @@ static int obj_put_compression_completion(struct rpc_server *rpc_s, struct msg_b
             
     err = obj_put_update_dht_local(dsg, od);
 
-    if(err != 0)
+    if(err != 0) {
         uloga("'%s()': failed with %d.\n", __func__, err);
         return err;
-
+    }
     ls_add_obj(dsg->ls, od);
 
 #ifdef DS_SYNC_MSG
