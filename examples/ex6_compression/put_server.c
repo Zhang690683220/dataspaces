@@ -43,8 +43,8 @@ int main(int argc, char** argv)
 
         uint64_t lb[2] = {0}, ub[2] = {0};
 
-        ub[0] = (N-1)/2;  
-        ub[1] = M-1;
+        ub[0] = 7;  
+        ub[1] = 3;
 
         zfp_conf conf = {
             .type = zfp_type_double,
@@ -59,6 +59,8 @@ int main(int argc, char** argv)
         dspaces_unlock_on_write("my_test_lock", NULL);
     }
 
+    double *data1 = data+32;
+
     for(int timestep=0; timestep<10; timestep++)
     {
         dspaces_lock_on_write("my_test_lock", NULL);
@@ -70,8 +72,8 @@ int main(int argc, char** argv)
 
         uint64_t lb[2] = {0}, ub[2] = {0};
 
-        lb[0] = (N-1)/2+1;  
-        lb[1] = 0;
+        lb[0] = 0;  
+        lb[1] = 4;
 
         ub[0] = N-1;  
         ub[1] = M-1;
@@ -84,7 +86,7 @@ int main(int argc, char** argv)
             .dims = ndim
         };
 
-        dspaces_put(var_name, timestep, sizeof(double), ndim, lb, ub, data, 2, &conf);
+        dspaces_put(var_name, timestep, sizeof(double), ndim, lb, ub, data1, 2, &conf);
 
         dspaces_unlock_on_write("my_test_lock", NULL);
     }
