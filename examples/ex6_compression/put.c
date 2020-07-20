@@ -93,6 +93,8 @@ int main(int argc, char** argv)
 
     printf("finished!\n");
 
+    dspaces_finalize();
+
     return 0;
 
 
