@@ -39,8 +39,8 @@
 #include "config.h"
 #include "util.h"
 
-#define max(a,b) (a) > (b) ? (a):(b)
-#define min(a,b) (a) < (b) ? (a):(b)
+#define __max__(a,b) (a) > (b) ? (a):(b)
+#define __min__(a,b) (a) < (b) ? (a):(b)
 
 enum bb_dim {
         bb_x = 0,
