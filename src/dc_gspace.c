@@ -1765,14 +1765,7 @@ int dcg_obj_put(struct obj_data *od)
         msg->private = od;
 
         double *buf = msg->msg_data;
-        for(int i=0; i<8;i++)
-        {
-        for (int j = 0; j < 8; j++)
-        {
-            printf("%lf ",*(buf+i*8+j));
-        }
-        printf("**************\n");       
-        }
+        
 
 #ifndef DS_SYNC_MSG //not define
         msg->sync_op_id = syncop_ref(sync_op_id);
