@@ -929,90 +929,15 @@ int common_dspaces_put_compression(const char *var_name,
             }
             sync_op_id = err;
 
-
-            if(od->obj_desc.iscompressed)
-            {
-                double *array = malloc(8*8*sizeof(double));
-                zfp_type rtype = conf->type;     /* array scalar type */
-                zfp_field* rfield;  /* array meta data */
-                zfp_stream* rzfp;   /* compressed stream */
-                void* rbuffer;      /* storage for compressed stream */
-                size_t rbufsize;    /* byte size of compressed buffer */
-                bitstream* rstream; /* bit stream to write to or read from */
-                size_t rzfpsize;    /* byte size of compressed stream */
-                switch (conf->dims)
-                {
-                case 1:
-                        rfield = zfp_field_1d(array, rtype, ub[0]-lb[0]+1);
-                        break;
-        
-                case 2:
-                        rfield = zfp_field_2d(array, rtype, ub[0]-lb[0]+1, 
-                                            ub[1]-lb[1]+1);
-                        break;
-        
-                case 3:
-                        rfield = zfp_field_3d(array, rtype, ub[0]-lb[0]+1, 
-                                            ub[1]-lb[1]+1, 
-                                            ub[2]-lb[2]+1);
-                        break;
-
-                case 4:
-                        rfield = zfp_field_4d(array, rtype, ub[0]-lb[0]+1, 
-                                            ub[1]-lb[1]+1, 
-                                            ub[2]-lb[2]+1, 
-                                            ub[3]-lb[3]+1);
-                        break;
-        
-                default:
-                        fprintf(stderr, "zfp only support up to 4 dimension compression\n");
-                        exit(1);
-                        break;
-                }
-
-                    /* allocate meta data for a compressed stream */
-                rzfp = zfp_stream_open(NULL);
-                    /* set compression mode and parameters via one of three functions */
-                if (conf->rate !=0)
-                {
-                        zfp_stream_set_rate(rzfp, conf->rate, rtype, conf->dims, 0);
-                }
-                else if(conf->precision !=0)
-                {
-                        zfp_stream_set_precision(rzfp, conf->precision);
-                }
-                else if(conf->tolerance !=0)
-                {
-                        zfp_stream_set_accuracy(rzfp, (conf->max-conf->min)*conf->tolerance);
-                }
-                 /* allocate buffer for compressed data */
-                rbufsize = zfp_stream_maximum_size(rzfp, rfield);
-                rbuffer = malloc(rbufsize);
-                memcpy(rbuffer, od->data, od->obj_desc.compressed_bytes);
-
-                    /* associate bit stream with allocated buffer */
-                rstream = stream_open(rbuffer, rbufsize);
-                zfp_stream_set_bit_stream(rzfp, rstream);
-                zfp_stream_rewind(rzfp);
-
-                if (!zfp_decompress(rzfp, rfield)) {
-                        fprintf(stderr, "decompression failed\n");
-                        exit(1);
-                }
-
-                for(int i=0; i<8;i++)
-                {
-                        for (int j = 0; j < 8; j++)
-                        {
-                            printf("%lf ", *(array+i*8+j));
-                        }
-                        printf("\n");       
-                }
-                free(buffer);
-                free(rbuffer);
-            }
-
+            
+               
         }
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+        stream_close(stream);
+        free(buffer);
+
+        
         return 0;
 #endif
 }
