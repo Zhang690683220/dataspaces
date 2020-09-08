@@ -140,6 +140,7 @@ int common_run_server(int num_sp, int num_cp, enum transport_type type, void* gc
                         return -1;
 
                 while (!dsg_complete(dsg)){
+                        sleep(10);
                         err = dsg_process(dsg);
                         if(err<0)
                                 break;
